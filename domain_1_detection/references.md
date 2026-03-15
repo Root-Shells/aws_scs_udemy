@@ -2,6 +2,34 @@
 
 ## GuardDuty
 
+### Service Architecture
+```mermaid
+flowchart LR
+    subgraph DataSources ["Data Sources (Primary)"]
+        direction TB
+        VPC([VPC Flow Logs])
+        CT([CloudTrail Logs])
+        R53([Route 53 DNS Query Logs])
+    end
+
+    subgraph Optional ["Optional Features"]
+        direction TB
+        S3([S3 Logs])
+        EBS([EBS Volumes])
+        LNA([Lambda Network Activity])
+        RDS([RDS & Aurora Login Activity])
+        EKS([EKS Audit Logs & Runtime Monitoring])
+    end
+
+    DataSources --> GD[["GuardDuty"]]
+    Optional --> GD
+
+    GD -- "findings" --> EB["EventBridge"]
+
+    EB -- "trigger" --> SNS["SNS"]
+    EB -- "invoke" --> Lambda["Lambda"]
+```
+
 ### Overview
 - **Threat detection service** that uses AI/ML, anomaly detection, and malicious file discovery
 - **No software to install** - one-click enable
