@@ -79,3 +79,37 @@ flowchart LR
 | Malware Protection for S3 | Scans uploaded objects to detect malware |
 | Malware Protection for AWS Backups | Scans backups (EBS snapshots, AMIs, etc.) |
 | RDS Protection | Analyzes RDS/Aurora login activity for access threats |
+
+## GuardDuty Findings & Automations
+
+### Findings Characteristics
+- **Data Streams**: Pulls independent streams directly from CloudTrail (management & data events), VPC Flow Logs, and EKS logs.
+- **Severity Scores**: Range from **0.1 to 8.9+**.
+    - **Low**: 0.1 – 3.9
+    - **Medium**: 4.0 – 6.9
+    - **High**: 7.0 – 8.9+
+- **Naming Convention**: `ThreatPurpose:ResourceTypeAffected/ThreatFamilyName.DetectionMechanism!Artifact`
+- **Testing**: Generate **sample findings** in the GuardDuty console to verify automation workflows.
+- **Investigation**: Use the console to identify the specific **API** used to invoke a finding.
+
+### Automated Response
+- **EventBridge Integration**: Primary mechanism for automated security responses.
+- **Multi-Account**: Events are published to both the **administrator account** and the **member account** of origin.
+- **Workflow Example**: GuardDuty Findings → EventBridge (Filter for High/Critical) → SNS Topic → Administrator Notification.
+
+#### Automation Architecture
+```mermaid
+flowchart TD
+    GD[["GuardDuty"]] -- "finding" --> EB["EventBridge"]
+    
+    subgraph Targets ["Automation Targets"]
+        direction LR
+        EB -- "trigger" --> SQS["SQS"]
+        EB -- "trigger" --> SNS["SNS"]
+        EB -- "trigger" --> Lambda["Lambda"]
+    end
+
+    SNS -- "invoke" --> HTTP["HTTP (e.g. Slack)"]
+    SNS -- "invoke" --> Email["Email"]
+```
+
