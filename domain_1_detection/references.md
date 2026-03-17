@@ -113,3 +113,157 @@ flowchart TD
     SNS -- "invoke" --> Email["Email"]
 ```
 
+## GuardDuty Multi-Account Strategy
+
+- Use an AWS Organization to manage GuardDuty across multiple accounts
+- Invite member accounts through GuardDuty
+- In an AWS Org - you can specify a member account as the organization's **delegated admin** for GuardDuty
+
+```mermaid
+flowchart TB
+    subgraph Org ["AWS Organization"]
+        Admin["Delegated Admin Account"]
+    end
+    
+    subgraph Members ["Member Accounts"]
+        M1["Account A"]
+        M2["Account B"]
+        M3["Account C"]
+    end
+    
+    Admin -- "manage" --> M1
+    Admin -- "manage" --> M2
+    Admin -- "manage" --> M3
+```
+
+## GuardDuty Architectures
+
+### Architecture 1: Basic Notification Flow
+
+```mermaid
+flowchart LR
+    EC2["EC2 Web Server"]
+    VPC["VPC Flow Logs"]
+    GD["GuardDuty"]
+    EB["EventBridge"]
+    SNS["SNS"]
+    Admin["Security Admin"]
+    
+    EC2 --> VPC
+    VPC --> GD
+    GD -- "finding" --> EB
+    EB -- "notify" --> SNS
+    SNS --> Admin
+```
+
+### Architecture 2: Auto-Blocking Malicious IPs via NACL
+
+```mermaid
+flowchart TD
+    EC2["EC2 Web Server"]
+    VPC["VPC Flow Logs"]
+    GD["GuardDuty"]
+    EB["EventBridge"]
+    Lambda["Lambda"]
+    NACL["NACL"]
+    Admin["Security Admin"]
+    
+    EC2 --> VPC
+    VPC --> GD
+    GD -- "finding" --> EB
+    EB -- "invoke" --> Lambda
+    Lambda -- "block IP" --> NACL
+    Lambda -- "notify" --> Admin
+```
+
+### Architecture 3: AWS Firewall Manager with IP Blocking
+
+```mermaid
+flowchart TD
+    subgraph VPC ["VPC"]
+        FW["Firewall Subnet"]
+        EC2["EC2 Instance"]
+    end
+    
+    VPC["VPC Flow Logs"]
+    GD["GuardDuty"]
+    EB["EventBridge"]
+    Lambda["Lambda"]
+    IPDB["Malicious IP Database"]
+    SNS["SNS"]
+    Admin["Security Admin"]
+    
+    EC2 --> VPC
+    VPC --> GD
+    GD -- "finding" --> EB
+    EB -- "invoke" --> Lambda
+    Lambda -- "check" --> IPDB
+    IPDB -- "malicious" --> Lambda
+    Lambda -- "add rule" --> FW
+    Lambda -- "notify" --> SNS
+    SNS --> Admin
+```
+
+## GuardDuty Trusted and Threat IP Lists
+
+- Works only for **public IP addresses**
+- **Trusted IP List**:
+    - List of IP addresses + CIDR ranges that you trust
+    - GuardDuty will NOT generate findings for traffic involving these trusted IPs
+- **Threat IP List**:
+    - List of known malicious IP addresses and CIDR ranges
+    - GuardDuty generates findings based on threat list matches
+    - Can be supplied by 3rd party threat intelligence or created custom
+- **Multi-Account**: Only the GuardDuty administrator account can manage these lists
+
+```mermaid
+flowchart LR
+    subgraph Admin ["GuardDuty Admin"]
+        TL["Trusted IP List"]
+        ThL["Threat IP List"]
+    end
+    
+    GD["GuardDuty"]
+    
+    TL -.->|"exclude from findings"| GD
+    ThL -.->|"generate findings"| GD
+```
+
+## GuardDuty Suppression Rules
+
+- Automatically filter and archive new findings based on defined criteria
+- Use cases:
+    - Low-value findings you don't need to act on
+    - Known false positives
+    - Threats you don't intend to respond to
+- Can suppress:
+    - Entire finding type (e.g., all findings of type `Trojan`)
+    - More granular criteria (e.g., suppress findings only for specific EC2 instances)
+- **Important**: Suppressed findings are NOT sent to:
+    - Security Hub
+    - S3
+    - Amazon Detective
+    - EventBridge
+- You can still view suppressed findings in the archive
+
+```mermaid
+flowchart TD
+    GD["GuardDuty"]
+    EB["EventBridge"]
+    Suppress["Suppression Rules"]
+    Archive["Archive"]
+    
+    GD -- "finding" --> Suppress
+    Suppress -- "match" --> Archive
+    Suppress -- "no match" --> EB
+```
+
+## GuardDuty Troubleshooting
+
+- If GuardDuty is not generating any findings (or certain finding types):
+- **Example**: GuardDuty is enabled but not generating DNS-based findings
+    - GuardDuty only processes DNS logs if you use the **default VPC DNS resolver**
+    - Custom DNS resolvers will NOT generate DNS-based findings
+- **Best Practice**: Enable GuardDuty even in AWS regions you don't actively use
+    - Attackers may use unused regions to evade detection
+
