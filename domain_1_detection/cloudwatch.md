@@ -148,3 +148,164 @@ flowchart TD
 - Logs Insights queries are **not real-time**
 - Cross-account aggregation uses Kinesis Data Streams + Firehose
 - Default encryption is AWS-managed; can use CMK
+
+---
+
+## CloudWatch Alarms
+
+### Overview
+```mermaid
+flowchart LR
+    Metric["Metric"] --> Alarm["CloudWatch Alarm"]
+    
+    Alarm --> States{Alarm States}
+    States --> OK["OK"]
+    States --> INSUFF["INSUFFICIENT_DATA"]
+    States --> ALARM["ALARM"]
+    
+    Alarm --> Targets["Alarm Targets"]
+    Targets --> EC2["EC2 Actions\n(stop/terminate/reboot/recover)"]
+    Targets --> AS["Auto Scaling"]
+    Targets --> SNS["SNS Notification"]
+```
+
+- Triggers notifications for any CloudWatch metric
+- Evaluation options: sampling, percentage, max, min, etc.
+
+### Alarm States
+
+| State | Description |
+|-------|-------------|
+| **OK** | Metric is within defined threshold |
+| **ALARM** | Metric exceeds threshold |
+| **INSUFFICIENT_DATA** | Not enough data available (starting up or missing metrics) |
+
+### Period & Resolution
+- **Period**: Length of time in seconds to evaluate the metric
+- **High Resolution Metrics**: Support 10s, 30s, or multiples of 60 seconds
+
+### Alarm Targets
+
+| Target | Actions |
+|--------|---------|
+| **EC2 Instance** | Stop, Terminate, Reboot, Recover |
+| **Auto Scaling** | Trigger scale-in/scale-out actions |
+| **SNS** | Send notification (then trigger Lambda, email, etc.) |
+
+### Composite Alarms
+```mermaid
+flowchart TD
+    subgraph Conditions ["Alarm Conditions"]
+        CPU["CPU High Alarm"]
+        Net["Network High Alarm"]
+    end
+    
+    Conditions --> Composite["Composite Alarm"]
+    Composite -->|"AND/OR"| Alert["Alert"]
+    
+    Composite -.->|"reduce noise"| Noise["Reduce Alarm Noise"]
+```
+
+- Monitors state of **multiple other alarms**
+- Supports **AND** and **OR** conditions
+- Reduces alarm fatigue by creating complex conditions
+- Example: Trigger alert only when CPU is high **AND** network traffic is high
+
+### EC2 Instance Recovery
+
+```mermaid
+flowchart LR
+    subgraph StatusChecks ["Status Checks"]
+        Instance["Instance Status\n(VM health)"]
+        System["System Status\n(hardware)"]
+        EBS["EBS Status\n(volume health)"]
+    end
+    
+    StatusChecks --> Recover["Recover Instance"]
+    Recover --> SameIP["Same Private IP"]
+    Recover --> SameEIP["Same Elastic IP"]
+    Recover --> SameMeta["Same Metadata"]
+    Recover --> SamePG["Same Placement Group"]
+```
+
+- **Instance Status**: Checks EC2 virtual machine
+- **System Status**: Checks underlying hardware
+- **EBS Status**: Checks attached EBS volumes
+- **Recovery**: Preserves private IP, public IP, Elastic IP, metadata, placement group
+
+### Alarm Good to Know
+
+- Can create alarms based on **CloudWatch Logs metric filters**
+- Test alarms using CLI:
+  ```bash
+  aws cloudwatch set-alarm-state \
+    --alarm-name "myalarm" \
+    --state-value ALARM \
+    --state-reason "testing"
+  ```
+- Alarm actions require correct IAM permissions
+- Can set alarm to trigger on any metric namespace (CWAgent, EC2, Lambda, etc.)
+
+---
+
+## CloudWatch Contributor Insights
+
+### Overview
+```mermaid
+flowchart LR
+    subgraph LogSources ["Log Sources"]
+        VPC["VPC Flow Logs"]
+        DNS["DNS Logs"]
+        CW["CloudWatch Logs"]
+    end
+    
+    LogSources --> CI["Contributor Insights"]
+    CI --> TimeSeries["Time Series"]
+    CI --> TopTalkers["Top Talkers"]
+    
+    TopTalkers --> Hosts["Bad Hosts"]
+    TopTalkers --> Network["Heaviest Network Users"]
+    TopTalkers --> URLs["URLs with Most Errors"]
+```
+
+- Analyzes log data and creates **time series** of contributor data
+- Identifies **top talkers** and what/who is impacting system performance
+
+### Use Cases
+
+| Use Case | Description |
+|----------|-------------|
+| Find Bad Hosts | Identify hosts causing errors |
+| Heaviest Network Users | Find top bandwidth consumers |
+| Top Error URLs | Identify URLs generating most errors |
+| Throttling | Find API endpoints being throttled |
+
+### Works With
+- **Any AWS-generated logs**: VPC Flow Logs, DNS logs, etc.
+- CloudWatch Logs (custom application logs)
+
+### Rules
+
+```mermaid
+flowchart LR
+    Rules[Rules] --> BuiltIn["AWS Built-in Rules"]
+    Rules --> Custom["Custom Rules"]
+    
+    BuiltIn -->|"leverages"| CW["CloudWatch Logs"]
+    Custom --> CW
+```
+
+- **Built-in Rules**: Created by AWS, leverages your existing CloudWatch Logs
+- **Custom Rules**: Create your own rules for specific analysis
+
+### Example: VPC Flow Logs
+
+```
+VPC Flow Logs → CloudWatch Logs → Contributor Insights → Top 10 IP Addresses
+```
+
+### Key Features
+- Real-time contributor data visualization
+- Time series charts showing top contributors
+- Works across multiple log groups
+- Can be used to create alarms on top contributors
