@@ -120,6 +120,36 @@ flowchart TD
 - Retention: indefinite or set period
 - **Replay**: Replay archived events for debugging/testing
 
+### Creating Rules
+
+#### Event Pattern Example: EC2 State Change
+```json
+{
+  "source": ["aws.ec2"],
+  "detail-type": ["EC2 Instance State-change Notification"],
+  "detail": {
+    "state": ["shutting-down", "terminated"]
+  }
+}
+```
+- Filter by EC2 instance state changes
+- Catch events like instance termination or shutdown
+
+#### Schedule Options
+- **One-time**: Trigger once and done
+- **Recurring**: 
+  - **Rate-based**: Every X minutes/hours/days
+  - **Cron-based**: Specific times (e.g., every Monday at 8am)
+- **Flexible time window**: Optional buffer for scheduling
+
+### Retry & Dead-Letter Queue
+- Failed deliveries are retried
+- Configure **dead-letter queue** for failed events after retries exhausted
+
+### API Destinations
+- Send events to **external HTTP endpoints**
+- Integrate with on-premises systems or third-party services
+
 ### Example Use Cases
 
 #### IAM Root Login Alert
@@ -127,9 +157,9 @@ flowchart TD
 IAM Root Sign-in Event → EventBridge → SNS → Email Notification
 ```
 
-#### S3 Object Upload Trigger
+#### EC2 Termination Alert
 ```
-S3 Object Created → EventBridge → Lambda → Process File
+EC2 State Change (terminated) → EventBridge → SNS → Email
 ```
 
 #### Scheduled Lambda
@@ -147,8 +177,12 @@ CloudTrail API Call → EventBridge → Filter → Lambda → Custom Action
 - **Formerly CloudWatch Events** - know both names
 - **Default event bus** receives AWS service events
 - Can create **custom event buses** for your applications
-- **Partner event buses** for SaaS integrations (Zendesk, Datadog, etc.)
+- **Partner event buses** for SaaS integrations (Zendesk, Datadog, Auth0, etc.)
 - **Schema Registry** - infer schemas and generate code
 - **Archive & Replay** - useful for debugging production issues
 - **Resource-based policies** enable cross-account event routing
 - Combine with **CloudTrail** to capture all API calls as events
+- Event patterns use JSON to filter events (e.g., EC2 state = terminating)
+- Schedules support **cron** and **rate** expressions
+- **Dead-letter queue** handles failed event deliveries
+- **API Destinations** connect to external HTTP endpoints
