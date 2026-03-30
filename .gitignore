@@ -1,0 +1,8 @@
+# Local artifacts
+main.pdf
+
+# IDE/System files
+.DS_Store
+.idea/
+.vscode/
+*.swp
