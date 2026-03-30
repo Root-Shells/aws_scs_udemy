@@ -8,11 +8,11 @@
 ```mermaid
 flowchart LR
     subgraph Sources ["Event Sources"]
-        EC2["EC2\n(start/stop/terminate)"]
-        CB["CodeBuild\n(build fail/success)"]
-        S3["S3\n(object upload)"]
-        TA["Trusted Advisor\n(findings)"]
-        CT["CloudTrail\n(API calls)"]
+        EC2["EC2<br>(start/stop/terminate)"]
+        CB["CodeBuild<br>(build fail/success)"]
+        S3["S3<br>(object upload)"]
+        TA["Trusted Advisor<br>(findings)"]
+        CT["CloudTrail<br>(API calls)"]
         Schedule["Schedule/Cron"]
     end
     
@@ -28,6 +28,31 @@ flowchart LR
     Destinations --> ECS["ECS Task"]
     Destinations --> SSM["SSM Automation"]
     Destinations --> Step["Step Functions"]
+```
+
+- Serverless event bus that routes events between AWS services
+- **Default Event Bus**: Receives events from AWS services
+- **Schedule**: Cron jobs to trigger actions at specific times
+- **Event Pattern**: React to specific service events
+
+### Capabilities
+
+#### Schedule/Cron Jobs
+- Trigger Lambda functions on a schedule
+- Examples: every hour, every Monday at 8am, first Monday of the month
+
+#### Event Patterns
+- React to service events (e.g., IAM root login)
+- Filter events by specific criteria (e.g., specific S3 bucket)
+- Combine with CloudTrail to intercept any API call
+
+### Event Bus Types
+
+```mermaid
+flowchart LR
+    EB["EventBridge"] --> Default["Default Event Bus<br>(AWS Services)"]
+    EB --> Partner["Partner Event Bus<br>(SaaS Partners)"]
+    EB --> Custom["Custom Event Bus<br>(Your Apps)"]
 ```
 
 - Serverless event bus that routes events between AWS services

@@ -80,8 +80,8 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Lifecycle ["Log Lifecycle"]
-        Standard["S3 Standard\n(0-90 days)"] --> IA["S3 IA\n(90-365 days)"]
-        IA --> Glacier["S3 Glacier\n(1+ years)"]
+        Standard["S3 Standard<br>(0-90 days)"] --> IA["S3 IA<br>(90-365 days)"]
+        IA --> Glacier["S3 Glacier<br>(1+ years)"]
     end
 ```
 

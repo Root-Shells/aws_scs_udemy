@@ -61,7 +61,10 @@ Concise bullet list of the most important takeaways.
 - Use Mermaid only where it adds value (e.g., identity federation, IAM role assumption, KMS envelope encryption, incident response workflows).
 - **Direction**: Prefer `LR` for simple flows and `TD` for hierarchies.
 - **Styling**: Use `subgraph` to group related components (e.g., "Data Sources", "Targets").
-- Keep node names readable and avoid overly dense diagrams.
+- **Node Labels**:
+  - Keep node names readable and avoid overly dense diagrams.
+  - **New Lines**: Never use the literal `\n` for new lines in node labels as it may not render correctly in all viewers. Instead, use the HTML break tag `<br>` to force a new line (e.g., `NodeA["Line 1<br>Line 2"]`).
+  - Always wrap node labels in double quotes (e.g., `NodeA["Label"]`) to ensure compatibility and prevent parsing errors.
 
 ## 3. Core Instructions for Agents
 

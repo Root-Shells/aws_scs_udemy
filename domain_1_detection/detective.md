@@ -15,8 +15,92 @@ flowchart LR
     
     Sources --> DT[["Detective"]]
     
-    DT -- "ML Analysis" --> Graph["Unified View\n(Graph DB)"]
+    DT -- "ML Analysis" --> Graph["Unified View<br>(Graph DB)"]
     DT -- "investigate" --> UI["Detective Console"]
+```
+
+- **Analyze, investigate, and identify root cause** of security findings using:
+  - Machine Learning (ML)
+  - Graph theory
+  - Statistics
+- **Automatically collects and processes** events from:
+  - VPC Flow Logs
+  - CloudTrail
+  - GuardDuty findings
+- **Creates a unified view** of all activity
+- **Optional data sources**: EKS audit logs, Security Hub, and more
+- **Retention**: 1 year of aggregated data analysis
+- **30-day free trial** available for each account
+
+### What It Answers
+- **How did it happen?**
+- **What was affected?**
+- **What actions did an attacker take?**
+
+### View Details
+- Affected resources
+- When an IP connected to an EC2
+- API calls
+- Login attempts
+- All activity timeline
+
+## Investigation Process
+
+### Investigating IAM Users/Roles
+- Helps investigate IAM users/roles to determine if a principal is involved in a security event
+- Example: Determine if a compromised IAM principal was used maliciously
+
+### Investigation Workflow
+```mermaid
+flowchart TD
+    GD["GuardDuty<br>Finding"] --> DT["Detective"]
+    
+    DT --> Analysis["Analysis"]
+    
+    Analysis --> TP{"True Positive<br>or<br>False Positive?"}
+    
+    TP -->|"True Positive"| Scope["Define Scope"]
+    TP -->|"False Positive"| Close["Close Investigation"]
+    
+    Scope --> Questions["Questions to Answer"]
+    Questions --> Q1["What systems/users<br>are compromised?"]
+    Questions --> Q2["Where did the<br>attack originate?"]
+    Questions --> Q3["How long has the<br>attack been ongoing?"]
+    Questions --> Q4["What actions did<br>the attacker take?"]
+    
+    Q1 --> Response["Response Actions"]
+    Q2 --> Response
+    Q3 --> Response
+    Q4 --> Response
+    
+    Response --> R1["Stop the attack"]
+    Response --> R2["Minimize damage"]
+    Response --> R3["Prevent similar<br>attacks"]
+```
+
+## Architecture Example
+
+### Scenario: CloudTrail Disabled
+```mermaid
+flowchart LR
+    subgraph Attack ["Security Event"]
+        Attacker["Attacker"] -->|"Disable CloudTrail"| CT["CloudTrail"]
+    end
+    
+    GD["GuardDuty"] -- "finding" --> DT["Detective"]
+    
+    DT --> Analysis["Analyze Activity"]
+    
+    Analysis --> Determine["Determine if<br>True Positive"]
+    
+    Determine -->|"Yes"| Scope["Define Scope<br>of Attack"]
+    Determine -->|"No"| Close["Mark as<br>False Positive"]
+    
+    Scope --> Actions["Response & Remediation"]
+    
+    Actions --> Stop["Stop attack"]
+    Actions --> Minimize["Minimize damage"]
+    Actions --> Prevent["Prevent future attacks"]
 ```
 
 - **Analyze, investigate, and identify root cause** of security findings using:

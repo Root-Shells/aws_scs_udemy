@@ -48,27 +48,15 @@ flowchart LR
 ### Cross-Account & Region Features
 ```mermaid
 flowchart TB
-    subgraph Org ["AWS Organization"]
-        Admin["Management Account\n(Security Hub Admin)"]
+    subgraph Org [AWS Organization]
+        Admin["Management Account<br>(Security Hub Admin)"]
     end
     
-    subgraph Accounts ["Member Accounts"]
+    subgraph Accounts [Member Accounts]
         A1["Account A"]
         A2["Account B"]
         A3["Account C"]
     end
-    
-    subgraph Regions ["Multiple Regions"]
-        R1["Region 1"]
-        R2["Region 2"]
-    end
-    
-    Admin --> A1
-    Admin --> A2
-    Admin --> A3
-    
-    R1 -.->|"aggregate findings"| Admin
-    R2 -.->|"aggregate findings"| Admin
 ```
 
 ### Organization Integration

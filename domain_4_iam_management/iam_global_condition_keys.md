@@ -63,8 +63,8 @@ flowchart TD
 ### Service-to-Service Flow
 ```mermaid
 flowchart LR
-    S3[("S3 Bucket\n(SourceArn)")] -->|Trigger| SNS["SNS Topic"]
-    SNS -->|Check| Policy{"SNS Policy\n(SourceArn Match?)"}
+    S3[("S3 Bucket<br>(SourceArn)")] -->|Trigger| SNS["SNS Topic"]
+    SNS -->|Check| Policy{"SNS Policy<br>(SourceArn Match?)"}
     Policy -->|Yes| Notify["Notify"]
 ```
 
