@@ -47,12 +47,12 @@ Global condition context keys are predefined keys provided by AWS that can be us
 ### Public vs. Private Access Flow
 ```mermaid
 flowchart TD
-    subgraph Internet [Public Access]
+    subgraph Internet ["Public Access"]
         User["IAM User"] -->|Public IP| S3_Public["S3 Public Endpoint"]
         S3_Public -->|Context| IP["aws:SourceIp"]
     end
 
-    subgraph VPC [Private Access]
+    subgraph VPC ["Private Access"]
         EC2["EC2 Instance"] -->|Private IP| VPCE["VPC Endpoint"]
         VPCE --> S3_Private["S3 Private Endpoint"]
         S3_Private -->|Context| VIP["aws:VpcSourceIp"]

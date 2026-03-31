@@ -5,7 +5,7 @@ The **Amazon CloudWatch Agent** is a unified agent that enables the collection o
 
 ```mermaid
 flowchart LR
-    subgraph Sources [Log Sources]
+    subgraph Sources ["Log Sources"]
         EC2["EC2 Instances"]
         OnPrem["On-Premises Servers"]
     end

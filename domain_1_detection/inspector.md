@@ -5,15 +5,15 @@
 
 ```mermaid
 flowchart LR
-    subgraph EC2 [EC2 Instances]
+    subgraph EC2 ["EC2 Instances"]
         SSM["SSM Agent"]
     end
     
-    subgraph ECR [ECR Container Images]
+    subgraph ECR ["ECR Container Images"]
         CI["Container Image"]
     end
     
-    subgraph Lambda [Lambda Functions]
+    subgraph Lambda ["Lambda Functions"]
         LF["Lambda Function"]
     end
     

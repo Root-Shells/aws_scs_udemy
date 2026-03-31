@@ -5,14 +5,14 @@
 
 ```mermaid
 flowchart LR
-    subgraph DataSources [Data Sources (Primary)]
+    subgraph DataSources ["Data Sources (Primary)"]
         direction TB
         VPC(["VPC Flow Logs"])
         CT(["CloudTrail Logs"])
         R53(["Route 53 DNS Query Logs"])
     end
 
-    subgraph Optional [Optional Features]
+    subgraph Optional ["Optional Features"]
         direction TB
         S3(["S3 Logs"])
         EBS(["EBS Volumes"])
@@ -20,14 +20,6 @@ flowchart LR
         RDS(["RDS & Aurora Login Activity"])
         EKS(["EKS Audit Logs & Runtime Monitoring"])
     end
-
-    DataSources --> GD[["GuardDuty"]]
-    Optional --> GD
-
-    GD -- "findings" --> EB["EventBridge"]
-
-    EB -- "trigger" --> SNS["SNS"]
-    EB -- "invoke" --> Lambda["Lambda"]
 ```
 
 ## Key Concepts
@@ -64,15 +56,22 @@ Findings use a standard naming convention: `ThreatPurpose:ResourceTypeAffected/T
 flowchart TD
     GD[["GuardDuty"]] -- "finding" --> EB["EventBridge"]
     
-    subgraph Targets [Automation Targets]
+    subgraph Targets ["Automation Targets"]
         direction LR
         EB -- "trigger" --> SQS["SQS"]
         EB -- "trigger" --> SNS["SNS"]
         EB -- "trigger" --> Lambda["Lambda"]
     end
+```
 
-    SNS -- "invoke" --> HTTP["HTTP (e.g. Slack)"]
-    SNS -- "invoke" --> Email["Email"]
+### Multi-Account Strategy
+GuardDuty integrates with **AWS Organizations**. A designated **Delegated Admin** account can manage findings across the entire organization.
+
+```mermaid
+flowchart TB
+    subgraph Org ["AWS Organization"]
+        Admin["Delegated Admin Account"]
+    end
 ```
 
 ### Multi-Account Strategy
@@ -84,7 +83,7 @@ flowchart TB
         Admin["Delegated Admin Account"]
     end
     
-    subgraph Members [Member Accounts]
+    subgraph Members ["Member Accounts"]
         M1["Account A"]
         M2["Account B"]
         M3["Account C"]

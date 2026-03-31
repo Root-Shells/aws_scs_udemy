@@ -44,11 +44,11 @@ The following diagram illustrates the hybrid authentication workflow.
 
 ```mermaid
 flowchart LR
-    subgraph OnPrem [On-Premises Environment]
+    subgraph OnPrem ["On-Premises Environment"]
         Server["On-Prem Server<br>(X.509 Certificate)"]
     end
 
-    subgraph AWS_IAM [AWS Identity]
+    subgraph AWS_IAM ["AWS Identity"]
         Anchor["Trust Anchor<br>(Private CA)"]
         RA["IAM Roles Anywhere"]
         STS["AWS STS"]

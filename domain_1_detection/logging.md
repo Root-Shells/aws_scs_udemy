@@ -32,7 +32,7 @@ When using Amazon S3 as a centralized logging repository, specific security cont
 flowchart LR
     S3[(S3 Bucket)] --> Glacier["S3 Glacier"]
     
-    subgraph Security [Security Controls]
+    subgraph Security ["Security Controls"]
         Enc["Encrypt (SSE-KMS)"]
         IAM["IAM Policy"]
         Bucket["Bucket Policy"]
@@ -50,7 +50,7 @@ flowchart LR
 ### Log Storage and Analysis Pipeline
 ```mermaid
 flowchart LR
-    subgraph Sources [Log Sources]
+    subgraph Sources ["Log Sources"]
         CT["CloudTrail"]
         CW["CloudWatch"]
         VPC["VPC Flow Logs"]
@@ -59,11 +59,11 @@ flowchart LR
         WAF["WAF"]
     end
     
-    subgraph Storage [S3 Storage]
+    subgraph Storage ["S3 Storage"]
         S3[("S3 Bucket")]
     end
     
-    subgraph Analysis [Analysis]
+    subgraph Analysis ["Analysis"]
         Athena["Athena"]
         CloudWatch["CloudWatch Insights"]
     end

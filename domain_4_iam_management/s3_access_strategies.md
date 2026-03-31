@@ -44,18 +44,18 @@ Instead of one massive, unmanageable bucket policy, create **Access Points** for
 ### VPC Endpoint Access Flow
 ```mermaid
 flowchart LR
-    subgraph OnPrem [On-Premises]
+    subgraph OnPrem ["On-Premises"]
         Server["Local Server"]
     end
 
-    subgraph AWS_VPC [AWS VPC]
+    subgraph AWS_VPC ["AWS VPC"]
         DX["Direct Connect / VPN"]
         VPCE["VPC Interface Endpoint<br>(PrivateLink)"]
         EC2["EC2 Instance"]
         GW["VPC Gateway Endpoint"]
     end
 
-    subgraph S3_Service [Amazon S3]
+    subgraph S3_Service ["Amazon S3"]
         S3[("S3 Bucket")]
     end
 

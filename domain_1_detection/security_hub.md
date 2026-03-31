@@ -5,7 +5,7 @@
 
 ```mermaid
 flowchart LR
-    subgraph Sources [Finding Sources]
+    subgraph Sources ["Finding Sources"]
         direction TB
         Config["Config"]
         GD["GuardDuty"]
@@ -42,11 +42,11 @@ Security Hub is designed for organizations. You can designate a single account a
 
 ```mermaid
 flowchart TB
-    subgraph Org [AWS Organization]
+    subgraph Org ["AWS Organization"]
         Admin["Management Account<br>(Security Hub Admin)"]
     end
     
-    subgraph Accounts [Member Accounts]
+    subgraph Accounts ["Member Accounts"]
         A1["Account A"]
         A2["Account B"]
         A3["Account C"]

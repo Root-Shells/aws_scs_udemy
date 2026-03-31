@@ -5,7 +5,7 @@
 
 ```mermaid
 flowchart LR
-    subgraph Sources [Log Sources]
+    subgraph Sources ["Log Sources"]
         SDK["SDK"]
         Agent["CloudWatch Agent<br>(Unified/Classic)"]
         EB["Elastic Beanstalk"]
@@ -16,11 +16,6 @@ flowchart LR
         CT["CloudTrail"]
         R53["Route53 DNS Queries"]
     end
-    
-    LG["Log Group"] --> LS["Log Stream"]
-    LG --> Dest["Destinations"]
-    
-    Sources --> LG
 ```
 
 ## Key Concepts
@@ -73,11 +68,11 @@ To centralize logs from multiple accounts:
 
 ```mermaid
 flowchart TD
-    subgraph AccountA [Sender Account]
+    subgraph AccountA ["Sender Account"]
         LG["Log Group"] --> Sub["Subscription Filter"]
     end
     
-    subgraph AccountB [Recipient Account]
+    subgraph AccountB ["Recipient Account"]
         KDS["Kinesis Data Stream"]
         KDF["Kinesis Data Firehose"]
         S3[("S3 Bucket")]
@@ -104,7 +99,7 @@ flowchart LR
     States --> INSUFF["INSUFFICIENT_DATA"]
     States --> ALARM["ALARM"]
     
-    Alarm --> Targets [Alarm Targets]
+    Alarm --> Targets ["Alarm Targets"]
     Targets --> EC2["EC2 Actions<br>(stop/terminate/reboot/recover)"]
     Targets --> AS["Auto Scaling"]
     Targets --> SNS["SNS Notification"]
@@ -138,7 +133,7 @@ Alarms can be configured to automatically recover an EC2 instance if a system st
 
 ```mermaid
 flowchart LR
-    subgraph LogSources [Log Sources]
+    subgraph LogSources ["Log Sources"]
         VPC["VPC Flow Logs"]
         DNS["DNS Logs"]
         CW["CloudWatch Logs"]

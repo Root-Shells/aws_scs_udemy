@@ -42,11 +42,11 @@ CORS is required when you host a website (e.g., `www.example.com`) that needs to
 ### CORS Pre-flight Request
 ```mermaid
 flowchart TD
-    subgraph Browser [Web Browser]
+    subgraph Browser ["Web Browser"]
         App["App at site-a.com"]
     end
 
-    subgraph S3_Bucket [S3 Bucket (site-b.com)]
+    subgraph S3_Bucket ["S3 Bucket (site-b.com)"]
         Policy["CORS Config"]
     end
 

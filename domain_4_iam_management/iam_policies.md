@@ -82,13 +82,13 @@ The following diagram illustrates how **NotAction** shifts the scope of a policy
 
 ```mermaid
 flowchart LR
-    subgraph ActionScope [Action Evaluation]
+    subgraph ActionScope ["Action Evaluation"]
         direction TB
         A["Action: 's3:*'"] -->|Standard| B["Target: S3 Actions"]
         C["NotAction: 'iam:*'"] -->|Inverted| D["Target: Everything EXCEPT IAM"]
     end
 
-    subgraph EvaluationResult [Evaluation Result]
+    subgraph EvaluationResult ["Evaluation Result"]
         direction TB
         E["Effect: Allow"] --> F["Authorization Granted"]
         G["Effect: Deny"] --> H["Explicit Deny (Overrides All)"]

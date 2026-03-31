@@ -44,13 +44,13 @@ The following diagram shows how Access Analyzer uses CloudTrail logs to generate
 
 ```mermaid
 flowchart LR
-    subgraph Workload [Active Workload]
+    subgraph Workload ["Active Workload"]
         App["Lambda / EC2"] -->|"API Calls"| AWS["AWS Services"]
     end
     
     AWS -->|"Log Events"| CT["CloudTrail"]
     
-    subgraph Analyzer [IAM Access Analyzer]
+    subgraph Analyzer ["IAM Access Analyzer"]
         CT -->|"Analyze Logs<br>(Up to 90 Days)"| AA["Policy Generator"]
         AA -->|"Output"| NewPolicy["Fine-Grained<br>IAM Policy"]
     end
