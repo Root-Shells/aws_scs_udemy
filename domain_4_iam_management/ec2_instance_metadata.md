@@ -63,11 +63,11 @@ flowchart TD
         IAM["IAM Service"]
     end
 
-    App -->|"1. Request Credentials<br>(via IMDSv1 or v2)"| IMDS
+    App --->|"1. Request Credentials<br>(via IMDSv1 or v2)"| IMDS
     IMDS -->|"2. Fetch Temp Keys"| IAM
-    IAM -- "3. AccessKey, SecretKey, Token" --> IMDS
-    IMDS -- "4. Returns Credentials" --> App
-    App -->|"5. Authorized API Call"| S3[("S3 Bucket")]
+    IAM -->|"3. AccessKey, SecretKey, Token"| IMDS
+    IMDS --->|"4. Returns Credentials"| App
+    App --->|"5. Authorized API Call"| S3[("S3 Bucket")]
 ```
 
 ## Security Relevance
