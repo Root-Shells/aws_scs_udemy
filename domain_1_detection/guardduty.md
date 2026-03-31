@@ -72,16 +72,6 @@ flowchart TB
     subgraph Org ["AWS Organization"]
         Admin["Delegated Admin Account"]
     end
-```
-
-### Multi-Account Strategy
-GuardDuty integrates with **AWS Organizations**. A designated **Delegated Admin** account can manage findings across the entire organization.
-
-```mermaid
-flowchart TB
-    subgraph Org [AWS Organization]
-        Admin["Delegated Admin Account"]
-    end
     
     subgraph Members ["Member Accounts"]
         M1["Account A"]
@@ -117,6 +107,6 @@ Amazon GuardDuty is an essential "set-and-forget" service for AWS security. By c
 ## Quick Review Checklist
 - [ ] Enabled via a single click; agentless.
 - [ ] Analyzes VPC Flow Logs, CloudTrail, and DNS Logs.
-- [ ] severity scores: 0.1-3.9 (Low), 4.0-6.9 (Med), 7.0-8.9 (High).
+- [ ] Severity scores: 0.1-3.9 (Low), 4.0-6.9 (Med), 7.0-8.9 (High).
 - [ ] Trusted IP lists whitelist known-good traffic.
 - [ ] Integrates with EventBridge for automated remediation.

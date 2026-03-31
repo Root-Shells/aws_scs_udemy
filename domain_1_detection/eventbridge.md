@@ -15,6 +15,8 @@ flowchart LR
         CT["CloudTrail<br>(API calls)"]
         Schedule["Schedule/Cron"]
     end
+    
+    Sources --> EB["Event Bus"]
 ```
 
 ## Key Concepts
@@ -51,7 +53,7 @@ Rules use JSON patterns to filter events.
 ### 3. Advanced Features
 - **Archive & Replay**: You can archive events and "replay" them later to debug or recover from failures in your downstream applications.
 - **API Destinations**: Send events to any HTTP endpoint outside of AWS (e.g., a 3rd party webhook).
-- **Dead-Letter Queues (DLQ)**: SQS queues used to store events that couldn't be delivered to a target after retries.
+- **Dead-Letter Queues (DLQ)**: **SQS** queues used to store events that couldn't be delivered to a target after retries.
 
 ## Architecture / Flow
 
@@ -65,59 +67,6 @@ flowchart TD
     end
     
     subgraph Members ["Member Accounts"]
-        MemberA["Account A"] -->|"PutEvents"| EB
-        MemberB["Account B"] -->|"PutEvents"| EB
-    end
-```
-
-## Key Concepts
-- **Event Bus**: Receives events. You can use the **Default** bus (AWS services), **Partner** bus (SaaS), or **Custom** bus (your apps).
-- **Rules**: Match incoming events and route them to targets.
-- **Targets**: AWS services or HTTP endpoints that receive events in JSON format.
-- **Schema Registry**: Stores event structures (schemas) to help developers generate code for event-driven applications.
-
-## Detailed Notes
-
-### 1. Event Bus Types
-| Event Bus | Description |
-|-----------|-------------|
-| **Default** | Receives events from AWS services (EC2, S3, etc.). |
-| **Partner** | Receives events from SaaS partners (Zendesk, Datadog, Auth0). |
-| **Custom** | Receives events from your own applications via the `PutEvents` API. |
-
-### 2. Creating Rules & Patterns
-Rules use JSON patterns to filter events.
-- **Event Patterns**: Match specific fields in the event JSON (e.g., matching only "terminated" EC2 instances).
-- **Schedules**: Cron or rate expressions to trigger targets at specific times.
-
-#### Event Pattern Example: EC2 State Change
-```json
-{
-  "source": ["aws.ec2"],
-  "detail-type": ["EC2 Instance State-change Notification"],
-  "detail": {
-    "state": ["shutting-down", "terminated"]
-  }
-}
-```
-
-### 3. Advanced Features
-- **Archive & Replay**: You can archive events and "replay" them later to debug or recover from failures in your downstream applications.
-- **API Destinations**: Send events to any HTTP endpoint outside of AWS (e.g., a 3rd party webhook).
-- **Dead-Letter Queues (DLQ)**: SQS queues used to store events that couldn't be delivered to a target after retries.
-
-## Architecture / Flow
-
-### Cross-Account Event Routing
-You can aggregate events from multiple accounts into a central event bus using **Resource-Based Policies**.
-
-```mermaid
-flowchart TD
-    subgraph Central [Central Account]
-        EB["Event Bus"] --> Policy["Resource Policy"]
-    end
-    
-    subgraph Members [Member Accounts]
         MemberA["Account A"] -->|"PutEvents"| EB
         MemberB["Account B"] -->|"PutEvents"| EB
     end

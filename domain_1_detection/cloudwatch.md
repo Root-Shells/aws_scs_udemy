@@ -99,7 +99,7 @@ flowchart LR
     States --> INSUFF["INSUFFICIENT_DATA"]
     States --> ALARM["ALARM"]
     
-    Alarm --> Targets ["Alarm Targets"]
+    Alarm --> Targets["Alarm Targets"]
     Targets --> EC2["EC2 Actions<br>(stop/terminate/reboot/recover)"]
     Targets --> AS["Auto Scaling"]
     Targets --> SNS["SNS Notification"]

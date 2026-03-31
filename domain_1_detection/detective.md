@@ -29,11 +29,11 @@ flowchart LR
 
 ### 1. Data Collection
 Amazon Detective automatically ingests and processes events from:
-- **Required**: VPC Flow Logs, CloudTrail, and GuardDuty findings.
-- **Optional**: EKS audit logs and Security Hub findings.
+- **Required**: **VPC Flow Logs**, **CloudTrail**, and **GuardDuty** findings.
+- **Optional**: **EKS audit logs** and **Security Hub** findings.
 
 ### 2. Investigation Process
-Detective helps investigate IAM users and roles to determine if a principal was involved in a security event (e.g., were compromised credentials used maliciously?).
+Detective helps investigate **IAM users** and **roles** to determine if a principal was involved in a security event (e.g., were compromised credentials used maliciously?).
 
 #### Investigation Workflow
 ```mermaid
@@ -47,7 +47,7 @@ flowchart TD
     TP -->|"True Positive"| Scope["Define Scope"]
     TP -->|"False Positive"| Close["Close Investigation"]
     
-    Scope --> Questions [Questions to Answer]
+    Scope --> Questions["Questions to Answer"]
     Questions --> Q1["What systems/users<br>are compromised?"]
     Questions --> Q2["Where did the<br>attack originate?"]
     Questions --> Q3["How long has the<br>attack been ongoing?"]
@@ -65,67 +65,15 @@ flowchart TD
 
 ## Architecture / Flow
 
-### Example: CloudTrail Disabled Investigation
-```mermaid
-flowchart LR
-    subgraph Attack ["Security Event"]
-        Attacker["Attacker"] -->|"Disable CloudTrail"| CT["CloudTrail"]
-    end
-```
+### Example: Security Event Investigation
+This flow demonstrates how Detective helps transition from a high-level finding to a detailed response.
 
-## Key Concepts
-- **Behavior Graph**: A linked set of data generated from logs that shows relationships between resources and identities.
-- **Root Cause Analysis**: Helps answer "How did it happen?", "What was affected?", and "What actions did the attacker take?".
-- **Historical Analysis**: Maintains up to **1 year** of aggregated data for investigations.
-- **30-Day Free Trial**: Available for every account to evaluate the service.
-
-## Detailed Notes
-
-### 1. Data Collection
-Amazon Detective automatically ingests and processes events from:
-- **Required**: VPC Flow Logs, CloudTrail, and GuardDuty findings.
-- **Optional**: EKS audit logs and Security Hub findings.
-
-### 2. Investigation Process
-Detective helps investigate IAM users and roles to determine if a principal was involved in a security event (e.g., were compromised credentials used maliciously?).
-
-#### Investigation Workflow
 ```mermaid
 flowchart TD
-    GD["GuardDuty<br>Finding"] --> DT["Detective"]
-    
-    DT --> Analysis["Analysis"]
-    
-    Analysis --> TP{"True Positive<br>or<br>False Positive?"}
-    
-    TP -->|"True Positive"| Scope["Define Scope"]
-    TP -->|"False Positive"| Close["Close Investigation"]
-    
-    Scope --> Questions [Questions to Answer]
-    Questions --> Q1["What systems/users<br>are compromised?"]
-    Questions --> Q2["Where did the<br>attack originate?"]
-    Questions --> Q3["How long has the<br>attack been ongoing?"]
-    Questions --> Q4["What actions did<br>the attacker take?"]
-    
-    Q1 --> Response["Response Actions"]
-    Q2 --> Response
-    Q3 --> Response
-    Q4 --> Response
-    
-    Response --> R1["Stop the attack"]
-    Response --> R2["Minimize damage"]
-    Response --> R3["Prevent similar<br>attacks"]
-```
-
-## Architecture / Flow
-
-### Example: CloudTrail Disabled Investigation
-```mermaid
-flowchart LR
-    subgraph Attack [Security Event]
-        Attacker["Attacker"] -->|"Disable CloudTrail"| CT["CloudTrail"]
+    subgraph Event ["Security Event"]
+        Attacker["Attacker"] -->|"Action"| Resource["AWS Resource"]
     end
-    
+
     GD["GuardDuty"] -- "finding" --> DT["Detective"]
     
     DT --> Analysis["Analyze Activity"]
@@ -152,19 +100,19 @@ flowchart LR
 
 ## Common Pitfalls / Misconfigurations
 - **Delayed Activation**: If Detective is not enabled before an incident, it cannot retroactively build the behavior graph for the time preceding its activation (it needs time to ingest logs).
-- **Missing Logs**: If CloudTrail is disabled in a region, Detective will have a blind spot for that region's activity.
+- **Missing Logs**: If **CloudTrail** is disabled in a region, Detective will have a blind spot for that region's activity.
 
 ## Exam / Review Notes
-- **Graph Theory**: Detective uses graph theory to link data.
-- **Data Retention**: 1 year.
-- **Primary Sources**: VPC Flow Logs, CloudTrail, GuardDuty.
+- **Graph Theory**: Detective uses **graph theory** to link data.
+- **Data Retention**: **1 year**.
+- **Primary Sources**: **VPC Flow Logs**, **CloudTrail**, **GuardDuty**.
 - **Investigation**: It is used for *investigating* findings, not for generating new alerts (that's GuardDuty's job).
 
 ## Summary
 Amazon Detective is an investigation tool that transforms raw logs into a visual, searchable graph of activity. It is used to determine the scope and root cause of security findings generated by services like GuardDuty and Security Hub.
 
 ## Quick Review Checklist
-- [ ] Automatically processes VPC Flow Logs, CloudTrail, and GuardDuty.
-- [ ] Retains 1 year of investigative data.
+- [ ] Automatically processes **VPC Flow Logs**, **CloudTrail**, and **GuardDuty**.
+- [ ] Retains **1 year** of investigative data.
 - [ ] Used for root cause analysis and blast radius determination.
-- [ ] Integrates with Security Hub for seamless investigation workflows.
+- [ ] Integrates with **Security Hub** for seamless investigation workflows.
