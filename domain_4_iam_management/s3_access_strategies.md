@@ -1,4 +1,6 @@
-# S3 Access Strategies: Cross-Account, VPC Endpoints, and Access Points
+# Domain 4: Identity and Access Management
+
+## S3 Access Strategies: Cross-Account, VPC Endpoints, and Access Points
 
 ## Overview
 Securing **Amazon S3** at scale requires more than basic bucket policies. Advanced strategies include managing cross-account access through IAM roles or resource policies, securing traffic via **VPC Endpoints**, and simplifying complex permissions using **S3 Access Points**.

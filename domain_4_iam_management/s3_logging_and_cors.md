@@ -1,4 +1,6 @@
-# S3 Access Logging & CORS
+# Domain 4: Identity and Access Management
+
+## S3 Access Logging & CORS
 
 ## Overview
 Auditability and controlled sharing are two pillars of **Amazon S3** security. **Server Access Logging** provides a detailed record of every request made to a bucket, while **Cross-Origin Resource Sharing (CORS)** allows web browsers to securely interact with assets stored in S3 from different origins.
