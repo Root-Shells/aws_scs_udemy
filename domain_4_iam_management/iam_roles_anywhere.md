@@ -1,6 +1,4 @@
-# Domain 4: Identity and Access Management
-
-## IAM Roles Anywhere
+# IAM Roles Anywhere
 
 ## Overview
 IAM Roles Anywhere allows workloads running outside of AWS (on-premises servers, containers, or other cloud providers) to obtain temporary security credentials to access AWS resources. This eliminates the need for managing long-term AWS Access Keys on non-AWS hardware, significantly improving the security posture of hybrid and multi-cloud environments.
@@ -46,11 +44,11 @@ The following diagram illustrates the hybrid authentication workflow.
 
 ```mermaid
 flowchart LR
-    subgraph OnPrem ["On-Premises Environment"]
+    subgraph OnPrem [On-Premises Environment]
         Server["On-Prem Server<br>(X.509 Certificate)"]
     end
 
-    subgraph AWS_IAM ["AWS Identity"]
+    subgraph AWS_IAM [AWS Identity]
         Anchor["Trust Anchor<br>(Private CA)"]
         RA["IAM Roles Anywhere"]
         STS["AWS STS"]

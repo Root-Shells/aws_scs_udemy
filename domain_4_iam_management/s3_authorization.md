@@ -1,6 +1,4 @@
-# Domain 4: Identity and Access Management
-
-## Amazon S3 Authorization & Ownership
+# Amazon S3 Authorization & Ownership
 
 ## Overview
 Authorization in **Amazon S3** is a multi-layered process that evaluates **IAM policies**, **S3 Bucket Policies**, and **Access Control Lists (ACLs)**. Understanding the evaluation logic and the transition toward **Bucket Owner Enforced** ownership is critical for securing data and preventing accidental exposure or lockouts.

@@ -1,6 +1,4 @@
-# Domain 4: Identity and Access Management
-
-## IAM Policy Structure & NotAction
+# IAM Policy Structure & NotAction
 
 ## Overview
 IAM policies are JSON documents that define permissions by specifying what actions are allowed or denied on which resources. Understanding the granular structure and advanced logic—specifically **NotAction**—is critical for implementing the Principle of Least Privilege and enforcing security guardrails like MFA or regional restrictions.

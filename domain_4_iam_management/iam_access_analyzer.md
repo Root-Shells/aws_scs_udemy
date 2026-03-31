@@ -1,6 +1,4 @@
-# Domain 4: Identity and Access Management
-
-## IAM Access Analyzer
+# IAM Access Analyzer
 
 ## Overview
 IAM Access Analyzer is a powerful security tool designed to help administrators identify resources in their environment that are shared with an external entity. By defining a "Zone of Trust," it flags any resource accessible from outside that zone as a finding. Additionally, it provides advanced capabilities for policy validation and automated policy generation based on actual usage data.
@@ -46,13 +44,13 @@ The following diagram shows how Access Analyzer uses CloudTrail logs to generate
 
 ```mermaid
 flowchart LR
-    subgraph Workload ["Active Workload"]
+    subgraph Workload [Active Workload]
         App["Lambda / EC2"] -->|"API Calls"| AWS["AWS Services"]
     end
     
     AWS -->|"Log Events"| CT["CloudTrail"]
     
-    subgraph Analyzer ["IAM Access Analyzer"]
+    subgraph Analyzer [IAM Access Analyzer]
         CT -->|"Analyze Logs<br>(Up to 90 Days)"| AA["Policy Generator"]
         AA -->|"Output"| NewPolicy["Fine-Grained<br>IAM Policy"]
     end
