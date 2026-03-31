@@ -1,11 +1,11 @@
-# Domain 1: Detection
+# Amazon CloudWatch Logs
 
-## Amazon CloudWatch Logs
+## Overview
+**Amazon CloudWatch Logs** is a centralized logging service that allows you to monitor, store, and access log files from **Amazon EC2** instances, **AWS CloudTrail**, **Route 53**, and other sources. It provides a highly scalable and durable environment for application and system logs.
 
-### Overview
 ```mermaid
 flowchart LR
-    subgraph Sources ["Log Sources"]
+    subgraph Sources [Log Sources]
         SDK["SDK"]
         Agent["CloudWatch Agent<br>(Unified/Classic)"]
         EB["Elastic Beanstalk"]
@@ -23,99 +23,64 @@ flowchart LR
     Sources --> LG
 ```
 
-- Centralized logging service for AWS and on-premises applications
-- **Log Groups**: Named containers for application logs (e.g., one per application)
-- **Log Streams**: Instances within a log group (specific containers, EC2 instances, log files)
-- **Retention**: 1 day to 10 years, or indefinitely
+## Key Concepts
+- **Log Group**: A collection of log streams that share the same retention, monitoring, and access control settings (typically one per application).
+- **Log Stream**: A sequence of log events that share the same source (e.g., a specific EC2 instance or container).
+- **Retention**: Configurable from 1 day to 10 years, or indefinite.
+- **Log Insights**: An interactive query engine for searching and analyzing log data.
 
-### Log Sources
+## Detailed Notes
 
+### 1. Log Sources & Management
 | Source | Description |
 |--------|-------------|
-| SDK | Send logs directly via API |
-| CloudWatch Agent / Unified Agent | Collect logs from EC2/on-premises |
-| Elastic Beanstalk | Application logs |
-| ECS | Container logs |
-| Lambda | Function execution logs |
-| VPC Flow Logs | VPC network traffic metadata |
-| API Gateway | API request logs |
-| CloudTrail | API call logs (filter-based) |
-| Route53 | DNS query logs |
+| **SDK** | Send logs directly via API calls. |
+| **Unified Agent** | Best practice for EC2 and On-Premises logging. |
+| **Lambda** | Automatically sends function execution logs. |
+| **VPC Flow Logs** | Captures metadata about IP traffic in the VPC. |
+| **API Gateway** | Logs request metadata and execution details. |
 
-### Encryption
-- Logs encrypted by default using AWS-managed keys
-- Optional: Use your own KMS customer-managed keys (CMK)
+#### Encryption
+- Logs are encrypted by default using AWS-managed keys.
+- **CMK Support**: You can use your own **KMS Customer Managed Key (CMK)** for enhanced control.
 
-### Querying Logs
+### 2. Querying & Analysis (Logs Insights)
+**CloudWatch Logs Insights** provides a purpose-built query language to analyze historical data.
+- **Visualization**: Results can be visualized as charts and added to Dashboards.
+- **Cross-Account**: Supports querying multiple log groups across different accounts.
+- **Field Discovery**: Automatically detects fields from log data (JSON or semi-structured).
 
-#### CloudWatch Logs Insights
-```mermaid
-flowchart LR
-    Query["Write Query"] --> Insights["Logs Insights"]
-    Insights --> Viz["Visualization"]
-    Insights --> LogLines["Log Lines"]
-    Viz --> Dashboard["Dashboard"]
-    Query --> Timeframe["Timeframe"]
-```
+> **Exam Tip**: CloudWatch Logs Insights is **not real-time**. It queries historical data when the query is executed.
 
-- Purpose-built query language for CloudWatch Logs
-- Automatically detects fields from log data
-- Features:
-  - Filter by conditions
-  - Calculate aggregate statistics
-  - Sort and limit events
-  - Save queries
-  - Add to CloudWatch Dashboards
-  - Query multiple log groups (including cross-account)
+### 3. Data Export & Streaming
 
-#### Example Queries
-- Most 25 recent events
-- Count events with exceptions/errors
-- Filter by specific IP address
-
-> **Note**: CloudWatch Logs Insights queries historical data only - not real-time
-
-### Export & Subscriptions
-
-#### S3 Export (Batch)
-```mermaid
-flowchart LR
-    LG["Log Group"] --> CreateExportTask["CreateExportTask"]
-    CreateExportTask --> S3[(S3 Bucket)]
-```
-- Batch export to S3
-- Can take up to **12 hours** to complete
-- Use `CreateExportTask` API
+#### Batch Export (S3)
+- Use the `CreateExportTask` API.
+- **Latency**: Can take up to **12 hours** to complete.
+- **Use Case**: Long-term archival or offline big data analysis.
 
 #### Real-Time Streaming (Subscriptions)
-```mermaid
-flowchart LR
-    LG["Log Group"] --> Filter["Subscription Filter"]
-    
-    Filter --> KDS["Kinesis Data Streams"]
-    Filter --> KDF["Kinesis Data Firehose"]
-    Filter --> Lambda["Lambda"]
-    
-    KDS --> KDF
-    KDF --> S3["S3"]
-    KDF --> OpenSearch["OpenSearch Service"]
-```
+- **Kinesis Data Streams / Firehose**: For processing or moving logs to S3/OpenSearch in near real-time.
+- **Lambda**: For custom real-time processing or alerting.
 
-- **Real-time** delivery of log events
-- Subscription filters define which events to send
-- Destinations: Kinesis Data Streams, Kinesis Data Firehose, Lambda
+## Architecture / Flow
 
 ### Cross-Account Log Aggregation
+To centralize logs from multiple accounts:
+1. Create a **Destination** (e.g., Kinesis Data Stream) in the recipient account.
+2. Attach a **Resource Policy** to the destination allowing the sender account.
+3. Create a **Subscription Filter** in the sender account targeting the destination.
+
 ```mermaid
 flowchart TD
-    subgraph AccountA ["Sender Account"]
+    subgraph AccountA [Sender Account]
         LG["Log Group"] --> Sub["Subscription Filter"]
     end
     
-    subgraph AccountB ["Recipient Account"]
+    subgraph AccountB [Recipient Account]
         KDS["Kinesis Data Stream"]
         KDF["Kinesis Data Firehose"]
-        S3[(S3 Bucket)]
+        S3[("S3 Bucket")]
     end
     
     Sub -->|"Subscription Destination"| KDS
@@ -123,36 +88,13 @@ flowchart TD
     KDF --> S3
 ```
 
-**Setup Process**:
-1. Create subscription filter in sender account
-2. Create destination (Kinesis Data Stream) in recipient account
-3. Attach destination access policy to allow sender
-4. Create IAM role in recipient account with permission to send to Kinesis
-5. Allow sender account to assume the role
-
-### Retention Policy
-
-| Storage Tier | Retention |
-|--------------|-----------|
-| CloudWatch Logs | 1 day to 10 years |
-| S3 (via export/subscription) | Custom |
-| S3 Glacier | Long-term archival |
-
-### Exam Tips
-
-- **Log Groups** = applications
-- **Log Streams** = instances/files/containers within an app
-- Subscription filters enable **real-time** log streaming
-- Export to S3 is **batch** (up to 12 hours)
-- Logs Insights queries are **not real-time**
-- Cross-account aggregation uses Kinesis Data Streams + Firehose
-- Default encryption is AWS-managed; can use CMK
-
 ---
 
-## CloudWatch Alarms
+# CloudWatch Alarms
 
-### Overview
+## Overview
+**CloudWatch Alarms** monitor a single metric over a specified time period and perform one or more actions based on the value of the metric relative to a threshold.
+
 ```mermaid
 flowchart LR
     Metric["Metric"] --> Alarm["CloudWatch Alarm"]
@@ -162,96 +104,41 @@ flowchart LR
     States --> INSUFF["INSUFFICIENT_DATA"]
     States --> ALARM["ALARM"]
     
-    Alarm --> Targets["Alarm Targets"]
+    Alarm --> Targets [Alarm Targets]
     Targets --> EC2["EC2 Actions<br>(stop/terminate/reboot/recover)"]
     Targets --> AS["Auto Scaling"]
     Targets --> SNS["SNS Notification"]
 ```
 
-- Triggers notifications for any CloudWatch metric
-- Evaluation options: sampling, percentage, max, min, etc.
+## Detailed Notes
 
-### Alarm States
+### 1. Alarm States
+- **OK**: The metric is within the defined threshold.
+- **ALARM**: The metric has exceeded the threshold.
+- **INSUFFICIENT_DATA**: Not enough data is available to determine the state.
 
-| State | Description |
-|-------|-------------|
-| **OK** | Metric is within defined threshold |
-| **ALARM** | Metric exceeds threshold |
-| **INSUFFICIENT_DATA** | Not enough data available (starting up or missing metrics) |
+### 2. Resolution & Period
+- **Period**: The length of time to evaluate the metric.
+- **High Resolution**: Custom metrics can be reported at 1-second, 10-second, or 30-second intervals.
 
-### Period & Resolution
-- **Period**: Length of time in seconds to evaluate the metric
-- **High Resolution Metrics**: Support 10s, 30s, or multiples of 60 seconds
+### 3. Composite Alarms
+Composite alarms monitor the state of multiple other alarms using logical **AND** or **OR** conditions.
+- **Benefit**: Reduces "alarm noise" by only triggering when a combination of conditions is met (e.g., CPU is High **AND** Network is High).
 
-### Alarm Targets
-
-| Target | Actions |
-|--------|---------|
-| **EC2 Instance** | Stop, Terminate, Reboot, Recover |
-| **Auto Scaling** | Trigger scale-in/scale-out actions |
-| **SNS** | Send notification (then trigger Lambda, email, etc.) |
-
-### Composite Alarms
-```mermaid
-flowchart TD
-    subgraph Conditions ["Alarm Conditions"]
-        CPU["CPU High Alarm"]
-        Net["Network High Alarm"]
-    end
-    
-    Conditions --> Composite["Composite Alarm"]
-    Composite -->|"AND/OR"| Alert["Alert"]
-    
-    Composite -.->|"reduce noise"| Noise["Reduce Alarm Noise"]
-```
-
-- Monitors state of **multiple other alarms**
-- Supports **AND** and **OR** conditions
-- Reduces alarm fatigue by creating complex conditions
-- Example: Trigger alert only when CPU is high **AND** network traffic is high
-
-### EC2 Instance Recovery
-
-```mermaid
-flowchart LR
-    subgraph StatusChecks ["Status Checks"]
-        Instance["Instance Status<br>(VM health)"]
-        System["System Status<br>(hardware)"]
-        EBS["EBS Status<br>(volume health)"]
-    end
-    
-    StatusChecks --> Recover["Recover Instance"]
-    Recover --> SameIP["Same Private IP"]
-    Recover --> SameEIP["Same Elastic IP"]
-    Recover --> SameMeta["Same Metadata"]
-    Recover --> SamePG["Same Placement Group"]
-```
-
-- **Instance Status**: Checks EC2 virtual machine
-- **System Status**: Checks underlying hardware
-- **EBS Status**: Checks attached EBS volumes
-- **Recovery**: Preserves private IP, public IP, Elastic IP, metadata, placement group
-
-### Alarm Good to Know
-- Can create alarms based on **CloudWatch Logs metric filters**
-- Test alarms using CLI:
-  ```bash
-  aws cloudwatch set-alarm-state \
-    --alarm-name "myalarm" \
-    --state-value ALARM \
-    --state-reason "testing"
-  ```
-- Alarm actions require correct IAM permissions
-- Can set alarm to trigger on any metric namespace (CWAgent, EC2, Lambda, etc.)
+### 4. EC2 Instance Recovery
+Alarms can be configured to automatically recover an EC2 instance if a system status check fails.
+- **Maintains**: Private/Public IP, Elastic IP, Metadata, and Placement Group.
 
 ---
 
-## CloudWatch Contributor Insights
+# CloudWatch Contributor Insights
 
-### Overview
+## Overview
+**Contributor Insights** analyzes log data to create time series that display contributor data. This helps you identify "Top Talkers"—the entities impacting system performance the most.
+
 ```mermaid
 flowchart LR
-    subgraph LogSources ["Log Sources"]
+    subgraph LogSources [Log Sources]
         VPC["VPC Flow Logs"]
         DNS["DNS Logs"]
         CW["CloudWatch Logs"]
@@ -266,316 +153,16 @@ flowchart LR
     TopTalkers --> URLs["URLs with Most Errors"]
 ```
 
-- Analyzes log data and creates **time series** of contributor data
-- Identifies **top talkers** and what/who is impacting system performance
+## Security Relevance
+- **Threat Detection**: Identify malicious IP addresses causing failed login attempts (via VPC Flow Logs).
+- **Availability Monitoring**: Identify specific API calls or URLs causing the majority of 5XX errors.
 
-### Use Cases
+## Summary
+Amazon CloudWatch is the foundation of AWS detection and monitoring. Logs provide the history, Alarms provide the triggers for automated response, and Contributor Insights provides the "who" behind performance or security anomalies.
 
-| Use Case | Description |
-|----------|-------------|
-| Find Bad Hosts | Identify hosts causing errors |
-| Heaviest Network Users | Find top bandwidth consumers |
-| Top Error URLs | Identify URLs generating most errors |
-| Throttling | Find API endpoints being throttled |
-
-### Works With
-- **Any AWS-generated logs**: VPC Flow Logs, DNS logs, etc.
-- CloudWatch Logs (custom application logs)
-
-### Rules
-
-```mermaid
-flowchart LR
-    Rules["Rules"] --> BuiltIn["AWS Built-in Rules"]
-    Rules --> Custom["Custom Rules"]
-    
-    BuiltIn -->|"leverages"| CW["CloudWatch Logs"]
-    Custom --> CW
-```
-
-- Centralized logging service for AWS and on-premises applications
-- **Log Groups**: Named containers for application logs (e.g., one per application)
-- **Log Streams**: Instances within a log group (specific containers, EC2 instances, log files)
-- **Retention**: 1 day to 10 years, or indefinitely
-
-### Log Sources
-
-| Source | Description |
-|--------|-------------|
-| SDK | Send logs directly via API |
-| CloudWatch Agent / Unified Agent | Collect logs from EC2/on-premises |
-| Elastic Beanstalk | Application logs |
-| ECS | Container logs |
-| Lambda | Function execution logs |
-| VPC Flow Logs | VPC network traffic metadata |
-| API Gateway | API request logs |
-| CloudTrail | API call logs (filter-based) |
-| Route53 | DNS query logs |
-
-### Encryption
-- Logs encrypted by default using AWS-managed keys
-- Optional: Use your own KMS customer-managed keys (CMK)
-
-### Querying Logs
-
-#### CloudWatch Logs Insights
-```mermaid
-flowchart LR
-    Query["Write Query"] --> Insights["Logs Insights"]
-    Insights --> Viz["Visualization"]
-    Insights --> LogLines["Log Lines"]
-    Viz --> Dashboard["Dashboard"]
-    Query --> Timeframe["Timeframe"]
-```
-
-- Purpose-built query language for CloudWatch Logs
-- Automatically detects fields from log data
-- Features:
-  - Filter by conditions
-  - Calculate aggregate statistics
-  - Sort and limit events
-  - Save queries
-  - Add to CloudWatch Dashboards
-  - Query multiple log groups (including cross-account)
-
-#### Example Queries
-- Most 25 recent events
-- Count events with exceptions/errors
-- Filter by specific IP address
-
-> **Note**: CloudWatch Logs Insights queries historical data only - not real-time
-
-### Export & Subscriptions
-
-#### S3 Export (Batch)
-```mermaid
-flowchart LR
-    LG["Log Group"] --> CreateExportTask["CreateExportTask"]
-    CreateExportTask --> S3[(S3 Bucket)]
-```
-- Batch export to S3
-- Can take up to **12 hours** to complete
-- Use `CreateExportTask` API
-
-#### Real-Time Streaming (Subscriptions)
-```mermaid
-flowchart LR
-    LG["Log Group"] --> Filter["Subscription Filter"]
-    
-    Filter --> KDS["Kinesis Data Streams"]
-    Filter --> KDF["Kinesis Data Firehose"]
-    Filter --> Lambda["Lambda"]
-    
-    KDS --> KDF
-    KDF --> S3["S3"]
-    KDF --> OpenSearch["OpenSearch Service"]
-```
-
-- **Real-time** delivery of log events
-- Subscription filters define which events to send
-- Destinations: Kinesis Data Streams, Kinesis Data Firehose, Lambda
-
-### Cross-Account Log Aggregation
-
-```mermaid
-flowchart TD
-    subgraph AccountA ["Sender Account"]
-        LG["Log Group"] --> Sub["Subscription Filter"]
-    end
-    
-    subgraph AccountB ["Recipient Account"]
-        KDS["Kinesis Data Stream"]
-        KDF["Kinesis Data Firehose"]
-        S3[(S3 Bucket)]
-    end
-    
-    Sub -->|"Subscription Destination"| KDS
-    KDS --> KDF
-    KDF --> S3
-```
-
-**Setup Process**:
-1. Create subscription filter in sender account
-2. Create destination (Kinesis Data Stream) in recipient account
-3. Attach destination access policy to allow sender
-4. Create IAM role in recipient account with permission to send to Kinesis
-5. Allow sender account to assume the role
-
-### Retention Policy
-
-| Storage Tier | Retention |
-|--------------|-----------|
-| CloudWatch Logs | 1 day to 10 years |
-| S3 (via export/subscription) | Custom |
-| S3 Glacier | Long-term archival |
-
-### Exam Tips
-
-- **Log Groups** = applications
-- **Log Streams** = instances/files/containers within an app
-- Subscription filters enable **real-time** log streaming
-- Export to S3 is **batch** (up to 12 hours)
-- Logs Insights queries are **not real-time**
-- Cross-account aggregation uses Kinesis Data Streams + Firehose
-- Default encryption is AWS-managed; can use CMK
-
----
-
-## CloudWatch Alarms
-
-### Overview
-```mermaid
-flowchart LR
-    Metric["Metric"] --> Alarm["CloudWatch Alarm"]
-    
-    Alarm --> States{Alarm States}
-    States --> OK["OK"]
-    States --> INSUFF["INSUFFICIENT_DATA"]
-    States --> ALARM["ALARM"]
-    
-    Alarm --> Targets["Alarm Targets"]
-    Targets --> EC2["EC2 Actions\n(stop/terminate/reboot/recover)"]
-    Targets --> AS["Auto Scaling"]
-    Targets --> SNS["SNS Notification"]
-```
-
-- Triggers notifications for any CloudWatch metric
-- Evaluation options: sampling, percentage, max, min, etc.
-
-### Alarm States
-
-| State | Description |
-|-------|-------------|
-| **OK** | Metric is within defined threshold |
-| **ALARM** | Metric exceeds threshold |
-| **INSUFFICIENT_DATA** | Not enough data available (starting up or missing metrics) |
-
-### Period & Resolution
-- **Period**: Length of time in seconds to evaluate the metric
-- **High Resolution Metrics**: Support 10s, 30s, or multiples of 60 seconds
-
-### Alarm Targets
-
-| Target | Actions |
-|--------|---------|
-| **EC2 Instance** | Stop, Terminate, Reboot, Recover |
-| **Auto Scaling** | Trigger scale-in/scale-out actions |
-| **SNS** | Send notification (then trigger Lambda, email, etc.) |
-
-### Composite Alarms
-```mermaid
-flowchart TD
-    subgraph Conditions ["Alarm Conditions"]
-        CPU["CPU High Alarm"]
-        Net["Network High Alarm"]
-    end
-    
-    Conditions --> Composite["Composite Alarm"]
-    Composite -->|"AND/OR"| Alert["Alert"]
-    
-    Composite -.->|"reduce noise"| Noise["Reduce Alarm Noise"]
-```
-
-- Monitors state of **multiple other alarms**
-- Supports **AND** and **OR** conditions
-- Reduces alarm fatigue by creating complex conditions
-- Example: Trigger alert only when CPU is high **AND** network traffic is high
-
-### EC2 Instance Recovery
-
-```mermaid
-flowchart LR
-    subgraph StatusChecks ["Status Checks"]
-        Instance["Instance Status\n(VM health)"]
-        System["System Status\n(hardware)"]
-        EBS["EBS Status\n(volume health)"]
-    end
-    
-    StatusChecks --> Recover["Recover Instance"]
-    Recover --> SameIP["Same Private IP"]
-    Recover --> SameEIP["Same Elastic IP"]
-    Recover --> SameMeta["Same Metadata"]
-    Recover --> SamePG["Same Placement Group"]
-```
-
-- **Instance Status**: Checks EC2 virtual machine
-- **System Status**: Checks underlying hardware
-- **EBS Status**: Checks attached EBS volumes
-- **Recovery**: Preserves private IP, public IP, Elastic IP, metadata, placement group
-
-### Alarm Good to Know
-
-- Can create alarms based on **CloudWatch Logs metric filters**
-- Test alarms using CLI:
-  ```bash
-  aws cloudwatch set-alarm-state \
-    --alarm-name "myalarm" \
-    --state-value ALARM \
-    --state-reason "testing"
-  ```
-- Alarm actions require correct IAM permissions
-- Can set alarm to trigger on any metric namespace (CWAgent, EC2, Lambda, etc.)
-
----
-
-## CloudWatch Contributor Insights
-
-### Overview
-```mermaid
-flowchart LR
-    subgraph LogSources ["Log Sources"]
-        VPC["VPC Flow Logs"]
-        DNS["DNS Logs"]
-        CW["CloudWatch Logs"]
-    end
-    
-    LogSources --> CI["Contributor Insights"]
-    CI --> TimeSeries["Time Series"]
-    CI --> TopTalkers["Top Talkers"]
-    
-    TopTalkers --> Hosts["Bad Hosts"]
-    TopTalkers --> Network["Heaviest Network Users"]
-    TopTalkers --> URLs["URLs with Most Errors"]
-```
-
-- Analyzes log data and creates **time series** of contributor data
-- Identifies **top talkers** and what/who is impacting system performance
-
-### Use Cases
-
-| Use Case | Description |
-|----------|-------------|
-| Find Bad Hosts | Identify hosts causing errors |
-| Heaviest Network Users | Find top bandwidth consumers |
-| Top Error URLs | Identify URLs generating most errors |
-| Throttling | Find API endpoints being throttled |
-
-### Works With
-- **Any AWS-generated logs**: VPC Flow Logs, DNS logs, etc.
-- CloudWatch Logs (custom application logs)
-
-### Rules
-
-```mermaid
-flowchart LR
-    Rules[Rules] --> BuiltIn["AWS Built-in Rules"]
-    Rules --> Custom["Custom Rules"]
-    
-    BuiltIn -->|"leverages"| CW["CloudWatch Logs"]
-    Custom --> CW
-```
-
-- **Built-in Rules**: Created by AWS, leverages your existing CloudWatch Logs
-- **Custom Rules**: Create your own rules for specific analysis
-
-### Example: VPC Flow Logs
-
-```
-VPC Flow Logs → CloudWatch Logs → Contributor Insights → Top 10 IP Addresses
-```
-
-### Key Features
-- Real-time contributor data visualization
-- Time series charts showing top contributors
-- Works across multiple log groups
-- Can be used to create alarms on top contributors
+## Quick Review Checklist
+- [ ] **Log Groups** represent applications; **Log Streams** represent sources.
+- [ ] **Subscription Filters** are for real-time streaming; **S3 Exports** are for batch (12hr latency).
+- [ ] **Composite Alarms** help reduce alert fatigue via logical conditions.
+- [ ] **Contributor Insights** identifies "Top Talkers" in log data.
+- [ ] **EC2 Recovery** preserves IP addresses and metadata.

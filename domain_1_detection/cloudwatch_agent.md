@@ -1,11 +1,11 @@
-# Domain 1: Detection
+# Amazon CloudWatch Agent
 
-## Amazon CloudWatch Agent
+## Overview
+The **Amazon CloudWatch Agent** is a unified agent that enables the collection of system-level metrics and log files from both **Amazon EC2** instances and on-premises servers. It is essential for monitoring resource utilization beyond standard hypervisor-level metrics, such as RAM usage and individual process performance.
 
-### Overview
 ```mermaid
 flowchart LR
-    subgraph Sources ["Log Sources"]
+    subgraph Sources [Log Sources]
         EC2["EC2 Instances"]
         OnPrem["On-Premises Servers"]
     end
@@ -16,81 +16,46 @@ flowchart LR
     Sources --> Agent
 ```
 
-- Collects **metrics and logs** from EC2 instances and on-premises servers
-- Sends data to **CloudWatch Logs** and **CloudWatch Metrics**
+## Key Concepts
+- **Unified Agent**: A single agent for both metrics and logs, replacing older standalone agents.
+- **System Metrics**: Collects RAM, disk, and process-level data not available via standard EC2 monitoring.
+- **Log Collection**: Transmits application and system logs to CloudWatch Logs.
+- **Configuration Management**: Centralized management via **SSM Parameter Store**.
 
-### Capabilities
+## Detailed Notes
+
+### 1. Capabilities
 
 #### Metrics Collection
 - System-level metrics:
   - RAM usage
   - Disk space
-  - CPU utilization
+  - CPU utilization (including core-level)
   - Process information
-- Default namespace: **CWAgent** (configurable)
+- Default namespace: **CWAgent** (configurable).
 
 #### Log Collection
-- No logs from EC2 can be sent without using the CloudWatch agent
-- Centralized configuration using **SSM Parameter Store**
+- **Mandatory**: No logs from within the EC2 OS can be sent to CloudWatch without an agent.
+- Centralized configuration using **SSM Parameter Store**.
 
-### IAM Permissions
-
-```mermaid
-flowchart LR
-    EC2["EC2 Instance"] -->|"iam:GetParameter"| SSM["SSM Parameter Store"]
-    EC2 -->|"logs:CreateLogGroup"| CWLogs["CloudWatch Logs"]
-    EC2 -->|"logs:CreateLogStream"| CWLogs
-    EC2 -->|"logs:PutLogEvents"| CWLogs
-    EC2 -->|"cloudwatch:PutMetricData"| CWMetrics["CloudWatch Metrics"]
-```
-
-Required IAM permissions for EC2 to send logs and metrics:
-- `cloudwatch:PutMetricData`
-- `logs:CreateLogGroup`
-- `logs:CreateLogStream`
-- `logs:PutLogEvents`
-- `ssm:GetParameter`
-
-### Procstat Plugin
-
-The **procstat plugin** collects metrics and monitors system utilization of individual processes:
-
-- **Supports**: Linux and Windows
+### 2. Procstat Plugin
+The **procstat plugin** monitors the system utilization of individual processes.
+- **Supports**: Linux and Windows.
 - **Metrics collected**:
-  - CPU time used by process
-  - Memory used by process
-  - Process ID tracking
-
-```mermaid
-flowchart TD
-    ProcStat["procstat Plugin"] --> CPU["CPU Time"]
-    ProcStat --> Memory["Memory Usage"]
-    ProcStat --> PID["Process ID"]
-    
-    subgraph Selection ["Process Selection Methods"]
-        PIDFile["pid_file"]
-        EXE["exe"]
-        Pattern["pattern (RegEx)"]
-    end
-    
-    ProcStat --> Selection
-```
+  - CPU time used by process.
+  - Memory usage.
+  - Process ID tracking.
 
 #### Process Selection Methods
 | Method | Description |
 |--------|-------------|
-| `pid_file` | Specify a file containing PIDs to monitor |
-| `exe` | Match by executable name |
-| `pattern` | Match by PID or Regular Expression |
+| `pid_file` | Specify a file containing PIDs to monitor. |
+| `exe` | Match by executable name. |
+| `pattern` | Match by PID or Regular Expression. |
 
-#### Procstat Metrics
-- Metrics begin with **`procstat` prefix**
-- Examples:
-  - `procstat_cpu_time`
-  - `procstat_memory_usage`
-  - `procstat_pid_count`
+> **Note**: Procstat metrics begin with the `procstat` prefix (e.g., `procstat_cpu_time`).
 
-### Installation & Setup
+### 3. Installation & Setup
 
 #### Installation (Amazon Linux 2)
 ```bash
@@ -103,46 +68,20 @@ Run the wizard to generate configuration:
 amazon-cloudwatch-agent-ctl -a start-config
 ```
 
-The wizard prompts for:
-- OS type (Linux/Windows)
-- EC2 or On-Premises
-- StatsD daemon enable/disable (default port 18176)
-- Metrics collection (CPU, memory, disk, network, processes, swap)
-- EC2 dimensions
-- Log files to monitor
-- Retention period
+#### IAM Policies & Permissions
+Required IAM permissions for the EC2 instance:
+- `cloudwatch:PutMetricData`
+- `logs:CreateLogGroup` / `CreateLogStream` / `PutLogEvents`
+- `ssm:GetParameter`
 
-#### IAM Policies
 | Policy | Purpose |
 |--------|---------|
-| **CloudWatchAgentServerPolicy** | Send metrics/logs to CloudWatch, get parameters from SSM |
-| **CloudWatchAgentAdminPolicy** | PUT config into SSM Parameter Store (only needed during setup) |
+| **CloudWatchAgentServerPolicy** | Send metrics/logs to CloudWatch, get parameters from SSM. |
+| **CloudWatchAgentAdminPolicy** | PUT config into SSM Parameter Store (needed only during setup). |
 
-### Starting the Agent
-
-#### From SSM Parameter Store
-```bash
-amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c ssm:AmazonCloudWatch-linux
-```
-
-#### From Local Config File
-```bash
-amazon-cloudwatch-agent-ctl -a start -c file:/path/to/config.json
-```
-
-### Metrics Collected
-
-| Category | Metrics |
-|----------|---------|
-| **CPU** | cpu_usage_idle, cpu_usage_iowait, etc. |
-| **Memory** | mem_used_percent, mem_available, mem_cached, etc. |
-| **Disk** | disk_used_percent, disk_inodes_free, etc. |
-| **Network** | netstat_tcp_established, packets_in/out, etc. |
-| **Processes** | processes_running, processes_idle, processes_dead, etc. |
-| **Swap** | swap_used_percent, swap_free, etc. |
+## Architecture / Flow
 
 ### Configuration Storage
-
 ```mermaid
 flowchart TD
     Wizard["Configuration Wizard"] --> SSM["SSM Parameter Store"]
@@ -153,40 +92,31 @@ flowchart TD
     File --> Agent
 ```
 
-- Configuration stored in SSM Parameter Store (e.g., `AmazonCloudWatch-linux`)
-- Can also use local JSON configuration file
-- SSM approach enables centralized config management across multiple instances
+## Security Relevance
+- **Detective Control**: Logs and metrics provide the audit trail needed to detect compromised instances or unusual resource consumption.
+- **Process Monitoring**: Using **procstat** helps detect unauthorized processes or resource-heavy malware (e.g., crypto miners).
 
-### Exam Tips
+## Operational / Real-World Context
+- **Centralized Config**: Using SSM Parameter Store allows you to update the agent configuration for an entire fleet of instances simultaneously.
+- **Fleet Management**: Standardize monitoring across Hybrid environments (On-Prem + AWS).
 
-- **No logs can be sent from EC2 without the agent** - this is a common exam question
-- Default namespace is **CWAgent**
-- StatsD daemon can be enabled for custom application metrics
-- Default collection interval is **60 seconds**
-- High resolution metrics available (1s, 10s, 30s, 60s)
-- Procstat plugin metrics begin with `procstat` prefix
-- Use **Admin policy** only when storing config to SSM; use **Server policy** for runtime
+## Common Pitfalls / Misconfigurations
+- **Missing IAM Permissions**: The agent will fail to push data if the instance role lacks the `CloudWatchAgentServerPolicy`.
+- **Clock Skew**: If the instance time is incorrect, CloudWatch may reject the incoming metrics/logs.
+- **Namespace Confusion**: Forgetting that custom metrics reside in the `CWAgent` namespace by default.
 
-### Troubleshooting
+## Exam / Review Notes
+- **EC2 Logs Requirement**: You MUST use an agent to send OS logs to CloudWatch.
+- **Procstat**: The tool for monitoring individual process utilization.
+- **Namespace**: Default is `CWAgent`.
+- **Admin vs. Server Policy**: Admin is for *writing* the config to SSM; Server is for *running* the agent.
 
-#### Agent Fails to Start
-- Check config validation logs:
-  ```
-  /opt/aws/amazon-cloudwatch-agent/logs/configuration-validation.log
-  ```
+## Summary
+The CloudWatch Agent is the primary mechanism for deep visibility into EC2 and on-premises instances. By combining system metrics, log collection, and process monitoring via the procstat plugin, it provides a comprehensive detective control for AWS environments.
 
-#### Cannot Find Metrics
-- Verify you are checking the correct **namespace** (default: CWAgent)
-- Check config file: `amazon-cloudwatch-agent.json`
-
-#### Agent Not Pushing Log Events
-| Check | Action |
-|-------|--------|
-| Agent Version | Update to latest agent version |
-| Connectivity | Test connectivity to CloudWatch Logs endpoint |
-| Security Groups | Verify SG allows outbound to CloudWatch |
-| NACLs | Check NACL allows traffic |
-| Account/Region | Verify correct account and region in config |
-| Log Group | Confirm log group name is correct |
-| IAM Permissions | Verify required permissions |
-| System Time | Ensure EC2 instance system time is correct |
+## Quick Review Checklist
+- [ ] Agent is required for RAM and individual process metrics.
+- [ ] Config is typically stored in SSM Parameter Store for scaling.
+- [ ] `procstat` is for per-process monitoring.
+- [ ] `CloudWatchAgentServerPolicy` must be attached to the instance role.
+- [ ] Check `/opt/aws/amazon-cloudwatch-agent/logs/configuration-validation.log` if it fails to start.

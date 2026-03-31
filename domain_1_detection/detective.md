@@ -1,11 +1,11 @@
-# Domain 1: Detection
+# Amazon Detective
 
-## Amazon Detective
+## Overview
+**Amazon Detective** makes it easy to analyze, investigate, and quickly identify the root cause of potential security issues or suspicious activities. It automatically collects log data from your AWS resources and uses machine learning, statistical analysis, and graph theory to build a linked set of data that enables you to easily conduct faster and more efficient security investigations.
 
-### Overview
 ```mermaid
 flowchart LR
-    subgraph Sources ["Data Sources"]
+    subgraph Sources [Data Sources]
         VPC["VPC Flow Logs"]
         CT["CloudTrail"]
         GD["GuardDuty Findings"]
@@ -19,38 +19,23 @@ flowchart LR
     DT -- "investigate" --> UI["Detective Console"]
 ```
 
-- **Analyze, investigate, and identify root cause** of security findings using:
-  - Machine Learning (ML)
-  - Graph theory
-  - Statistics
-- **Automatically collects and processes** events from:
-  - VPC Flow Logs
-  - CloudTrail
-  - GuardDuty findings
-- **Creates a unified view** of all activity
-- **Optional data sources**: EKS audit logs, Security Hub, and more
-- **Retention**: 1 year of aggregated data analysis
-- **30-day free trial** available for each account
+## Key Concepts
+- **Behavior Graph**: A linked set of data generated from logs that shows relationships between resources and identities.
+- **Root Cause Analysis**: Helps answer "How did it happen?", "What was affected?", and "What actions did the attacker take?".
+- **Historical Analysis**: Maintains up to **1 year** of aggregated data for investigations.
+- **30-Day Free Trial**: Available for every account to evaluate the service.
 
-### What It Answers
-- **How did it happen?**
-- **What was affected?**
-- **What actions did an attacker take?**
+## Detailed Notes
 
-### View Details
-- Affected resources
-- When an IP connected to an EC2
-- API calls
-- Login attempts
-- All activity timeline
+### 1. Data Collection
+Amazon Detective automatically ingests and processes events from:
+- **Required**: VPC Flow Logs, CloudTrail, and GuardDuty findings.
+- **Optional**: EKS audit logs and Security Hub findings.
 
-## Investigation Process
+### 2. Investigation Process
+Detective helps investigate IAM users and roles to determine if a principal was involved in a security event (e.g., were compromised credentials used maliciously?).
 
-### Investigating IAM Users/Roles
-- Helps investigate IAM users/roles to determine if a principal is involved in a security event
-- Example: Determine if a compromised IAM principal was used maliciously
-
-### Investigation Workflow
+#### Investigation Workflow
 ```mermaid
 flowchart TD
     GD["GuardDuty<br>Finding"] --> DT["Detective"]
@@ -62,7 +47,7 @@ flowchart TD
     TP -->|"True Positive"| Scope["Define Scope"]
     TP -->|"False Positive"| Close["Close Investigation"]
     
-    Scope --> Questions["Questions to Answer"]
+    Scope --> Questions [Questions to Answer]
     Questions --> Q1["What systems/users<br>are compromised?"]
     Questions --> Q2["Where did the<br>attack originate?"]
     Questions --> Q3["How long has the<br>attack been ongoing?"]
@@ -78,12 +63,12 @@ flowchart TD
     Response --> R3["Prevent similar<br>attacks"]
 ```
 
-## Architecture Example
+## Architecture / Flow
 
-### Scenario: CloudTrail Disabled
+### Example: CloudTrail Disabled Investigation
 ```mermaid
 flowchart LR
-    subgraph Attack ["Security Event"]
+    subgraph Attack [Security Event]
         Attacker["Attacker"] -->|"Disable CloudTrail"| CT["CloudTrail"]
     end
     
@@ -91,7 +76,7 @@ flowchart LR
     
     DT --> Analysis["Analyze Activity"]
     
-    Analysis --> Determine["Determine if<br>True Positive"]
+    Analysis --> Determine{"Determine if<br>True Positive"}
     
     Determine -->|"Yes"| Scope["Define Scope<br>of Attack"]
     Determine -->|"No"| Close["Mark as<br>False Positive"]
@@ -103,117 +88,29 @@ flowchart LR
     Actions --> Prevent["Prevent future attacks"]
 ```
 
-- **Analyze, investigate, and identify root cause** of security findings using:
-  - Machine Learning (ML)
-  - Graph theory
-  - Statistics
-- **Automatically collects and processes** events from:
-  - VPC Flow Logs
-  - CloudTrail
-  - GuardDuty findings
-- **Creates a unified view** of all activity
-- **Optional data sources**: EKS audit logs, Security Hub, and more
-- **Retention**: 1 year of aggregated data analysis
+## Security Relevance
+- **Detective Control**: Detective is a core part of the "Investigation" phase of incident response.
+- **Visibility**: Provides a unified timeline of events that spans multiple accounts and regions, which is often difficult to piece together manually from raw logs.
 
-### What It Answers
-- **How did it happen?**
-- **What was affected?**
-- **What actions did an attacker take?**
+## Operational / Real-World Context
+- **Security Operations Center (SOC)**: Analysts use the Detective console to visualize "API Call" spikes or "Unusual IP" logins associated with a GuardDuty finding.
+- **Incident Response**: When a high-severity finding appears in Security Hub, Detective is often the next stop for the responder to understand the "blast radius."
 
-### View Details
-- Affected resources
-- When an IP connected to an EC2
-- API calls
-- Login attempts
-- All activity timeline
+## Common Pitfalls / Misconfigurations
+- **Delayed Activation**: If Detective is not enabled before an incident, it cannot retroactively build the behavior graph for the time preceding its activation (it needs time to ingest logs).
+- **Missing Logs**: If CloudTrail is disabled in a region, Detective will have a blind spot for that region's activity.
 
-## Investigation Process
+## Exam / Review Notes
+- **Graph Theory**: Detective uses graph theory to link data.
+- **Data Retention**: 1 year.
+- **Primary Sources**: VPC Flow Logs, CloudTrail, GuardDuty.
+- **Investigation**: It is used for *investigating* findings, not for generating new alerts (that's GuardDuty's job).
 
-### Investigating IAM Users/Roles
-- Helps investigate IAM users/roles to determine if a principal is involved in a security event
-- Example: Determine if a compromised IAM principal was used maliciously
+## Summary
+Amazon Detective is an investigation tool that transforms raw logs into a visual, searchable graph of activity. It is used to determine the scope and root cause of security findings generated by services like GuardDuty and Security Hub.
 
-### Investigation Workflow
-```mermaid
-flowchart TD
-    GD["GuardDuty\nFinding"] --> DT["Detective"]
-    
-    DT --> Analysis["Analysis"]
-    
-    Analysis --> TP{"True Positive\nor\nFalse Positive?"}
-    
-    TP -->|"True Positive"| Scope["Define Scope"]
-    TP -->|"False Positive"| Close["Close Investigation"]
-    
-    Scope --> Questions["Questions to Answer"]
-    Questions --> Q1["What systems/users\nare compromised?"]
-    Questions --> Q2["Where did the\nattack originate?"]
-    Questions --> Q3["How long has the\nattack been ongoing?"]
-    Questions --> Q4["What actions did\nthe attacker take?"]
-    
-    Q1 --> Response["Response Actions"]
-    Q2 --> Response
-    Q3 --> Response
-    Q4 --> Response
-    
-    Response --> R1["Stop the attack"]
-    Response --> R2["Minimize damage"]
-    Response --> R3["Prevent similar\nattacks"]
-```
-
-## Architecture Example
-
-### Scenario: CloudTrail Disabled
-```mermaid
-flowchart LR
-    subgraph Attack ["Security Event"]
-        Attacker["Attacker"] -->|"Disable CloudTrail"| CT["CloudTrail"]
-    end
-    
-    GD["GuardDuty"] -- "finding" --> DT["Detective"]
-    
-    DT --> Analysis["Analyze Activity"]
-    
-    Analysis --> Determine["Determine if\nTrue Positive"]
-    
-    Determine -->|"Yes"| Scope["Define Scope\nof Attack"]
-    Determine -->|"No"| Close["Mark as\nFalse Positive"]
-    
-    Scope --> Actions["Response & Remediation"]
-    
-    Actions --> Stop["Stop attack"]
-    Actions --> Minimize["Minimize damage"]
-    Actions --> Prevent["Prevent future attacks"]
-```
-
-### Investigation Steps
-1. **GuardDuty generates a finding** when CloudTrail is disabled
-2. **Detective ingests the finding**
-3. **Analyze** whether activity is a true positive or false positive
-4. **If True Positive**:
-   - Define scope of malicious activity
-   - Identify compromised systems and users
-   - Identify attack origin
-   - Determine attack duration
-5. **Respond**:
-   - Stop the attack
-   - Minimize damage
-   - Prevent similar attacks
-
-## Data Collection
-
-### Required Data Sources
-- VPC Flow Logs
-- CloudTrail
-- GuardDuty findings
-
-### Optional Data Sources
-- EKS audit logs
-- Security Hub findings
-- Additional AWS services
-
-### Analysis Features
-- Machine learning models
-- Graph-based behavior analysis
-- Statistical analysis
-- 365 days of historical data
+## Quick Review Checklist
+- [ ] Automatically processes VPC Flow Logs, CloudTrail, and GuardDuty.
+- [ ] Retains 1 year of investigative data.
+- [ ] Used for root cause analysis and blast radius determination.
+- [ ] Integrates with Security Hub for seamless investigation workflows.

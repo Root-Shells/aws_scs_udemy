@@ -1,13 +1,13 @@
-# Domain 1: Detection
+# Amazon EventBridge
 
-## Amazon EventBridge
+> **Note**: Previously known as **CloudWatch Events**. Both names may appear on the exam.
 
-> **Note**: Previously known as CloudWatch Events. Both names may appear on the exam.
+## Overview
+**Amazon EventBridge** is a serverless event bus that makes it easy to connect applications together using data from your own applications, integrated SaaS applications, and AWS services. It is the core of event-driven architectures in AWS, allowing you to route events from sources to targets based on rules.
 
-### Overview
 ```mermaid
 flowchart LR
-    subgraph Sources ["Event Sources"]
+    subgraph Sources [Event Sources]
         EC2["EC2<br>(start/stop/terminate)"]
         CB["CodeBuild<br>(build fail/success)"]
         S3["S3<br>(object upload)"]
@@ -30,122 +30,25 @@ flowchart LR
     Destinations --> Step["Step Functions"]
 ```
 
-- Serverless event bus that routes events between AWS services
-- **Default Event Bus**: Receives events from AWS services
-- **Schedule**: Cron jobs to trigger actions at specific times
-- **Event Pattern**: React to specific service events
+## Key Concepts
+- **Event Bus**: Receives events. You can use the **Default** bus (AWS services), **Partner** bus (SaaS), or **Custom** bus (your apps).
+- **Rules**: Match incoming events and route them to targets.
+- **Targets**: AWS services or HTTP endpoints that receive events in JSON format.
+- **Schema Registry**: Stores event structures (schemas) to help developers generate code for event-driven applications.
 
-### Capabilities
+## Detailed Notes
 
-#### Schedule/Cron Jobs
-- Trigger Lambda functions on a schedule
-- Examples: every hour, every Monday at 8am, first Monday of the month
-
-#### Event Patterns
-- React to service events (e.g., IAM root login)
-- Filter events by specific criteria (e.g., specific S3 bucket)
-- Combine with CloudTrail to intercept any API call
-
-### Event Bus Types
-
-```mermaid
-flowchart LR
-    EB["EventBridge"] --> Default["Default Event Bus<br>(AWS Services)"]
-    EB --> Partner["Partner Event Bus<br>(SaaS Partners)"]
-    EB --> Custom["Custom Event Bus<br>(Your Apps)"]
-```
-
-- Serverless event bus that routes events between AWS services
-- **Default Event Bus**: Receives events from AWS services
-- **Schedule**: Cron jobs to trigger actions at specific times
-- **Event Pattern**: React to specific service events
-
-### Capabilities
-
-#### Schedule/Cron Jobs
-- Trigger Lambda functions on a schedule
-- Examples: every hour, every Monday at 8am, first Monday of the month
-
-#### Event Patterns
-- React to service events (e.g., IAM root login)
-- Filter events by specific criteria (e.g., specific S3 bucket)
-- Combine with CloudTrail to intercept any API call
-
-### Event Bus Types
-
-```mermaid
-flowchart LR
-    EB[EventBridge] --> Default["Default Event Bus\n(AWS Services)"]
-    EB --> Partner["Partner Event Bus\n(SaaS Partners)"]
-    EB --> Custom["Custom Event Bus\n(Your Apps)"]
-    
-    Partner --> Zendesk["Zendesk"]
-    Partner --> Datadog["Datadog"]
-    Partner --> Auth0["Auth0"]
-    
-    Custom --> App["Your Application"]
-```
-
+### 1. Event Bus Types
 | Event Bus | Description |
 |-----------|-------------|
-| **Default** | Events from AWS services (EC2, S3, CodeBuild, etc.) |
-| **Partner** | Events from SaaS partners (Zendesk, Datadog, Auth0, etc.) |
-| **Custom** | Your own applications can send custom events |
+| **Default** | Receives events from AWS services (EC2, S3, etc.). |
+| **Partner** | Receives events from SaaS partners (Zendesk, Datadog, Auth0). |
+| **Custom** | Receives events from your own applications via the `PutEvents` API. |
 
-### Destinations
-
-| Destination | Use Case |
-|-------------|----------|
-| Lambda | Run custom code |
-| SNS | Send notifications |
-| SQS | Queue events |
-| Kinesis Data Streams | Stream to data lakes |
-| ECS Task | Launch container tasks |
-| SSM Automation | Run SSM runbooks |
-| Step Functions | Orchestrate workflows |
-| CodePipeline | Trigger CI/CD |
-| CodeBuild | Trigger builds |
-| EC2 Actions | Start/stop/reboot instances |
-
-### Event Schema & Registry
-
-```mermaid
-flowchart LR
-    Events["Events"] --> Registry["Schema Registry"]
-    Registry --> Infer["Infer Schema"]
-    Infer --> Code["Generate Code"]
-    Code --> App["Application"]
-```
-
-- **Schema Registry**: EventBridge analyzes events and infers schema
-- **Code Generation**: Download code bindings to know event structure in advance
-- **Versioning**: Schemas can be versioned over time
-
-### Cross-Account & Archive
-
-#### Cross-Account Access
-```mermaid
-flowchart TD
-    subgraph Central["Central Account"]
-        EB["Event Bus"] --> Policy["Resource Policy"]
-    end
-    
-    subgraph Members ["Member Accounts"]
-        Member["Account A"] -->|"PutEvents"| EB
-        Member2["Account B"] -->|"PutEvents"| EB
-    end
-```
-
-- Use **resource-based policies** to allow cross-account access
-- Central event bus for AWS Organization
-- Member accounts can send events to central bus
-
-#### Event Archive & Replay
-- Archive all events or filter subsets
-- Retention: indefinite or set period
-- **Replay**: Replay archived events for debugging/testing
-
-### Creating Rules
+### 2. Creating Rules & Patterns
+Rules use JSON patterns to filter events.
+- **Event Patterns**: Match specific fields in the event JSON (e.g., matching only "terminated" EC2 instances).
+- **Schedules**: Cron or rate expressions to trigger targets at specific times.
 
 #### Event Pattern Example: EC2 State Change
 ```json
@@ -157,57 +60,53 @@ flowchart TD
   }
 }
 ```
-- Filter by EC2 instance state changes
-- Catch events like instance termination or shutdown
 
-#### Schedule Options
-- **One-time**: Trigger once and done
-- **Recurring**: 
-  - **Rate-based**: Every X minutes/hours/days
-  - **Cron-based**: Specific times (e.g., every Monday at 8am)
-- **Flexible time window**: Optional buffer for scheduling
+### 3. Advanced Features
+- **Archive & Replay**: You can archive events and "replay" them later to debug or recover from failures in your downstream applications.
+- **API Destinations**: Send events to any HTTP endpoint outside of AWS (e.g., a 3rd party webhook).
+- **Dead-Letter Queues (DLQ)**: SQS queues used to store events that couldn't be delivered to a target after retries.
 
-### Retry & Dead-Letter Queue
-- Failed deliveries are retried
-- Configure **dead-letter queue** for failed events after retries exhausted
+## Architecture / Flow
 
-### API Destinations
-- Send events to **external HTTP endpoints**
-- Integrate with on-premises systems or third-party services
+### Cross-Account Event Routing
+You can aggregate events from multiple accounts into a central event bus using **Resource-Based Policies**.
 
-### Example Use Cases
-
-#### IAM Root Login Alert
-```
-IAM Root Sign-in Event → EventBridge → SNS → Email Notification
+```mermaid
+flowchart TD
+    subgraph Central [Central Account]
+        EB["Event Bus"] --> Policy["Resource Policy"]
+    end
+    
+    subgraph Members [Member Accounts]
+        MemberA["Account A"] -->|"PutEvents"| EB
+        MemberB["Account B"] -->|"PutEvents"| EB
+    end
 ```
 
-#### EC2 Termination Alert
-```
-EC2 State Change (terminated) → EventBridge → SNS → Email
-```
+## Security Relevance
+- **Detective/Corrective Control**: EventBridge is the "glue" for automated remediation. For example, a GuardDuty finding can trigger an EventBridge rule that invokes a Lambda function to isolate a compromised instance.
+- **Governance**: Intercept sensitive API calls (via CloudTrail) like `iam:CreateUser` to trigger immediate security notifications.
 
-#### Scheduled Lambda
-```
-Cron (every hour) → EventBridge → Lambda → Run Script
-```
+## Operational / Real-World Context
+- **SaaS Integration**: Use Auth0 events to trigger user onboarding workflows in AWS.
+- **Compliance**: Automatically tag resources as they are created by intercepting the `CreateResource` API call.
 
-#### CloudTrail Integration
-```
-CloudTrail API Call → EventBridge → Filter → Lambda → Custom Action
-```
+## Common Pitfalls / Misconfigurations
+- **Missing Permissions**: The EventBridge rule needs an IAM role with permission to invoke the target (e.g., `sns:Publish`).
+- **Circular Loops**: Avoid rules that trigger actions that then generate the same event (e.g., a rule that reacts to S3 tags and then updates S3 tags).
 
-### Exam Tips
+## Exam / Review Notes
+- **Formerly CloudWatch Events**: The terms are often used interchangeably in older questions.
+- **JSON Filtering**: Understand how to read an event pattern.
+- **Cross-Account**: Enabled via resource-based policies on the event bus.
+- **Partner Events**: SaaS integration is a unique feature of EventBridge.
 
-- **Formerly CloudWatch Events** - know both names
-- **Default event bus** receives AWS service events
-- Can create **custom event buses** for your applications
-- **Partner event buses** for SaaS integrations (Zendesk, Datadog, Auth0, etc.)
-- **Schema Registry** - infer schemas and generate code
-- **Archive & Replay** - useful for debugging production issues
-- **Resource-based policies** enable cross-account event routing
-- Combine with **CloudTrail** to capture all API calls as events
-- Event patterns use JSON to filter events (e.g., EC2 state = terminating)
-- Schedules support **cron** and **rate** expressions
-- **Dead-letter queue** handles failed event deliveries
-- **API Destinations** connect to external HTTP endpoints
+## Summary
+Amazon EventBridge is the central nervous system for AWS automation. It decouples event sources from their handlers, enabling scalable, automated security responses and cross-service integrations.
+
+## Quick Review Checklist
+- [ ] Uses Rules to match event patterns or schedules.
+- [ ] Supports cross-account aggregation via resource policies.
+- [ ] Can replay archived events for troubleshooting.
+- [ ] Integrates with SaaS partners (Datadog, Auth0, etc.).
+- [ ] API Destinations allow calling external webhooks.
