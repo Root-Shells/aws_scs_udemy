@@ -54,7 +54,7 @@ graph LR
     NAT --> IGW
     IGW --> WWW
 
-    style NAT fill:#f9f,stroke:#333,stroke-width:2px
+    style NAT fill:#eff6ff,stroke:#333,stroke-width:2px
 ```
 
 ## Security Relevance

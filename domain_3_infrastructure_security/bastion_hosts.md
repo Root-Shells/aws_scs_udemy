@@ -51,10 +51,10 @@ graph LR
         end
     end
 
-    User -->|1. SSH (Port 22)| Bastion
-    Bastion -->|2. SSH (Port 22)| PrivateEC2
+    User -->|"1. SSH (Port 22)"| Bastion
+    Bastion -->|"2. SSH (Port 22)"| PrivateEC2
 
-    style Bastion fill:#f9f,stroke:#333,stroke-width:2px
+    style Bastion fill:#e7f5ff,stroke:#333,stroke-width:2px
 ```
 
 ## Security Relevance

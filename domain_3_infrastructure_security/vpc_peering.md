@@ -44,9 +44,9 @@ graph TD
     InstanceB <-->|Peering PCX-2| InstanceC
     InstanceA -.->|NO ACCESS| InstanceC
 
-    style InstanceA fill:#f9f,stroke:#333
-    style InstanceB fill:#ccf,stroke:#333
-    style InstanceC fill:#cfc,stroke:#333
+    style InstanceA fill:#fef2f2,stroke:#333
+    style InstanceB fill:#f5f3ff,stroke:#333
+    style InstanceC fill:#ecfdf5,stroke:#333
 ```
 
 ## Security Relevance
