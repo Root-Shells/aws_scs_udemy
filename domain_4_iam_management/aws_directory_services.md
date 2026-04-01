@@ -67,6 +67,9 @@ graph LR
     
     EC2 -->|Auth| ManagedAD
     OnPremApp -.->|Trust Path| ManagedAD
+
+    style ManagedAD fill:#eff6ff,stroke:#333
+    style OnPremDC fill:#fef2f2,stroke:#333
 ```
 
 ## Security Relevance

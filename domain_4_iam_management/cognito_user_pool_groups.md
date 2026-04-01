@@ -62,6 +62,9 @@ graph TD
     RoleReader -->|Allow Read| DDB
 
     User1 -.->|Default Selection| RoleEditor
+
+    style GroupA fill:#fef2f2,stroke:#333
+    style GroupB fill:#f5f3ff,stroke:#333
 ```
 
 ## Security Relevance

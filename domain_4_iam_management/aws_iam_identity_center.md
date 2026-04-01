@@ -63,6 +63,9 @@ graph TD
     Portal -->|Federated Login| App
     PermSet -.->|Provisioned as IAM Roles| AccDev
     PermSet -.->|Provisioned as IAM Roles| AccProd
+
+    style Portal fill:#eff6ff,stroke:#333
+    style PermSet fill:#fef2f2,stroke:#333
 ```
 
 ## Security Relevance
