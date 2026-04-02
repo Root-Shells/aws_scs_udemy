@@ -8,7 +8,7 @@ The goal is to transform raw technical learning notes into a polished **referenc
 
 ### Implementation Steps
 1. **Identify Domain**: Place files in the correct `domain_X_name` folder.
-2. **File Naming**: Use `snake_case.md` for service/topic files.
+2. **File Naming**: Use `snake_case.md` for service/topic files. Each file name should start with a numeric prefix (e.g., `01_`, `02_`) to indicate the order in the directory in which it was created to track learning/reference order.
 3. **Drafting**: Transform raw notes into well-structured markdown focusing on clarity, correctness, and practical understanding.
 4. **Verification**: Cross-reference with AWS documentation or exam guides. Mark uncertainties with `> Needs verification:`.
 
