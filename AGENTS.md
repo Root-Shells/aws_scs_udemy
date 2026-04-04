@@ -1,6 +1,6 @@
 # Agentic Workflow Guidelines - AWS SCS Study Notes
 
-This repository contains study notes for the AWS Certified Security - Specialty (SCS-C02) exam. It is structured as a collection of Markdown files organized by exam domains.
+This repository contains study notes for the AWS Certified Security - Specialty (SCS-C03) exam. It is structured as a collection of Markdown files organized by exam domains.
 
 ## 1. Project Overview & Workflow
 
@@ -91,5 +91,4 @@ Explicitly distinguish between:
 - **Links**: `find . -name "*.md" -exec markdown-link-check {} \;` (if available).
 
 ### Git
-- **Commits**: Use descriptive, imperative messages (e.g., "Add CloudWatch Contributor Insights section").
-- **Ignored Files**: Local artifacts like `main.pdf` or IDE settings must not be committed. Use the `.gitignore`.
+- **Commits**: Use descriptive, imperative messages (e.g., "Add CloudWatch Contributor Insights section"). 

@@ -92,6 +92,7 @@ sequenceDiagram
 ## Operational / Real-World Context
 - **Default NACL**: The default NACL for a VPC allows all inbound and outbound traffic. This ensures that connectivity works "out of the box" until you define tighter controls.
 - **Custom NACL**: New NACLs deny all traffic by default.
+- **Subnet Combinations**: When associating multiple subnets with a single NACL, you must ensure that the NACL rules account for all traffic patterns (CIDRs) across those subnets, as the stateless evaluation applies to all of them collectively.
 - **Troubleshooting**: If an instance can be pinged but cannot reach the internet to update packages, check the NACL outbound rules for ephemeral port ranges.
 
 ## Common Pitfalls / Misconfigurations
